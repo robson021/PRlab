@@ -7,7 +7,10 @@ package invoicewriter;
 
 import com.alee.laf.WebLookAndFeel;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -34,6 +37,10 @@ public class MenuBar_ extends JMenuBar {
             System.out.println("nowy projekt");
         });
         
+        newItem.addActionListener((ActionEvent ae) -> {
+            // TODO
+            
+        });
         fileMenu.add(newItem);
         fileMenu.add(openItem);
         add (fileMenu);   
