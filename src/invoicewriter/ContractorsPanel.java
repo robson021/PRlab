@@ -8,8 +8,13 @@ package invoicewriter;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -22,6 +27,11 @@ import javax.swing.JTextField;
  */
 public class ContractorsPanel extends JPanel {
     public static final int DEFAULT_COLUMN_SIZE = 15;
+    public static final String COMMA_DELIMITER = ",";
+    //static final String FILE_HEADER = "id,firstName,lastName,gender,age";
+    public static final String NEW_LINE_SEPARATOR = "\n";
+    private static final String FILE_NAME = "contractorsList.csv";
+
     private JButton addButton;
     private JButton backButton;
     private JPanel thisPanel;    
@@ -107,22 +117,62 @@ public class ContractorsPanel extends JPanel {
         
         backButton.addActionListener((ActionEvent e) -> {
             InvoiceWriter.swapPanel("mainPanel");
-        });
+            
+        });        
+        contractors = new ArrayList<>();
+        File f = new File(FILE_NAME);
+        if(!f.exists() || f.isDirectory())
+            initTestContractorsList();
+        
         
         // TODO contractors jlist               
         
     }   
     
     private class Contractor extends Person{
-        public Contractor(String n, String sn, String cn, String strName, int hn, String pc, String ct, int nip) {
+        public Contractor(String n, String sn, String cn, String strName, String hn, String pc, String ct, String nip) {
             super(n, sn, cn, strName, hn, pc, ct, nip);
         }        
     }
     
-    private void loadContractors () {
-        contractors = new ArrayList<>();
+    private void loadContractors () {        
         // TODO load form csv files
+        
     }
+    
+    private void initTestContractorsList() {
+        Contractor columnsName = new Contractor("Name", "Surname", "CompanyName", "Street", "HomeNo", "PostCode", "City", "NIP");
+        Contractor sampleContractor = new Contractor("Jan", "Kowalski", "Kowalski Spółka Z.O.O",
+                "Mickiewicza", "102", "33-100", "Tarnów", "1234567890");
+        
+        contractors.add(columnsName);
+        contractors.add(sampleContractor);
+        FileWriter fileWriter = null;        
+        try {
+            fileWriter = new FileWriter(FILE_NAME);
+                        
+            fileWriter.append(columnsName.toString());
+            fileWriter.append(NEW_LINE_SEPARATOR);
+            fileWriter.append(sampleContractor.toString());
+            fileWriter.append(NEW_LINE_SEPARATOR);
+            
+            System.out.println("Sample CSV file was created.");
+        } catch (IOException ex) {
+            Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException ex) {
+                System.out.println("Error while closing File Writer.");
+                ex.printStackTrace();
+            }
+        }
+        
+        
+    }
+    
+    
     
     
     // test gui show

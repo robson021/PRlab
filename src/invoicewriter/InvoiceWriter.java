@@ -86,6 +86,7 @@ public class InvoiceWriter extends JFrame {
     {     
         // Install WebLaF as application L&F
         WebLookAndFeel.install ();
+       
         
         SwingUtilities.invokeLater ( new Runnable ()
         {

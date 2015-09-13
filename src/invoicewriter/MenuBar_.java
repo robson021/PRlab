@@ -7,10 +7,7 @@ package invoicewriter;
 
 import com.alee.laf.WebLookAndFeel;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 import javax.swing.ButtonGroup;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -58,7 +55,7 @@ public class MenuBar_ extends JMenuBar {
         bgrp.add(webLaf);
         bgrp.add(classicLaf);        
         
-        webLaf.addActionListener((ActionEvent e) -> {          // cos nie dziala 
+        webLaf.addActionListener((ActionEvent e) -> {    // TODO 
             if (!webLaf.isSelected()) {
                 WebLookAndFeel.install();
                 repaint();
