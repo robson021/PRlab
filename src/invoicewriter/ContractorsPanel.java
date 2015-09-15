@@ -8,7 +8,10 @@ package invoicewriter;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -124,6 +127,7 @@ public class ContractorsPanel extends JPanel {
         if(!f.exists() || f.isDirectory())
             initTestContractorsList();
         
+        loadContractors();
         
         // TODO contractors jlist               
         
@@ -136,8 +140,35 @@ public class ContractorsPanel extends JPanel {
     }
     
     private void loadContractors () {        
-        // TODO load form csv files
+        BufferedReader fileReader = null;
+        contractors = new ArrayList<>();
         
+        String line = "";        
+        try {
+            fileReader = new BufferedReader(new FileReader(FILE_NAME));
+            while ((line = fileReader.readLine()) != null) {
+                String[] values = line.split(COMMA_DELIMITER);
+                if (values.length > 0) { // add new element to list
+                    contractors.add(new Contractor(values[0], values[1 ], values[2], values[3], values[4],
+                            values[5], values[6], values[7]));     
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fileReader.close();
+            } catch (IOException ex) {
+                System.out.println("error while closing file reader");
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Loaded contractors from " + FILE_NAME);    
+        for (Contractor c : contractors) {
+            System.out.println(c.toString());
+        }
     }
     
     private void initTestContractorsList() {
