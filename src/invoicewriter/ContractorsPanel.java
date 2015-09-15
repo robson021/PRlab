@@ -5,6 +5,8 @@
  */
 package invoicewriter;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -18,11 +20,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
 /**
  *
@@ -37,6 +45,8 @@ public class ContractorsPanel extends JPanel {
 
     private JButton addButton;
     private JButton backButton;
+    private JButton editButton;
+    private JButton deleteButton;
     private JPanel thisPanel;    
     
     private JTextField nameField;
@@ -47,7 +57,7 @@ public class ContractorsPanel extends JPanel {
     private JTextField codeField;
     private JTextField nipField;
     private JTextField regonField;
-    private JList contractorsList;
+    private JComboBox contractorsBox;
     private List<Contractor> contractors;   
     
     
@@ -129,9 +139,40 @@ public class ContractorsPanel extends JPanel {
         
         loadContractors();
         
-        // TODO contractors jlist               
+        // TODO contractors box               
+        initContractorsBox();
         
+        gbc.gridx=0; gbc.gridy++;
+        gbc.fill=GridBagConstraints.HORIZONTAL;
+        add (new JSeparator(), gbc);
+        gbc.gridx++;
+        add (new JSeparator(), gbc);
+        gbc.gridx=0;
+        gbc.fill=GridBagConstraints.NONE;
+        gbc.gridy++;
+        add (contractorsBox, gbc);
+        
+        editButton = new JButton("Edytuj");
+        deleteButton = new JButton("Usuń");
+        
+        gbc.gridx++;        
+        add (editButton, gbc);
+        gbc.gridy++;
+        add (deleteButton, gbc);
     }   
+
+    private void initContractorsBox() {
+        ArrayList<String> names = new ArrayList<>();
+        int i=0;
+        for (Contractor c : contractors) {
+            if (i != 0) {
+                String[] s = c.toString().split(COMMA_DELIMITER);
+                names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city
+            }
+            i++;
+        }
+        contractorsBox = new JComboBox(names.toArray());
+    }
     
     private class Contractor extends Person{
         public Contractor(String n, String sn, String cn, String strName, String hn, String pc, String ct, String nip) {
@@ -147,7 +188,7 @@ public class ContractorsPanel extends JPanel {
         try {
             fileReader = new BufferedReader(new FileReader(FILE_NAME));
             while ((line = fileReader.readLine()) != null) {
-                String[] values = line.split(COMMA_DELIMITER);
+                String[] values = line.split(COMMA_DELIMITER);                
                 if (values.length > 0) { // add new element to list
                     contractors.add(new Contractor(values[0], values[1 ], values[2], values[3], values[4],
                             values[5], values[6], values[7]));     
@@ -175,6 +216,8 @@ public class ContractorsPanel extends JPanel {
         Contractor columnsName = new Contractor("Name", "Surname", "CompanyName", "Street", "HomeNo", "PostCode", "City", "NIP");
         Contractor sampleContractor = new Contractor("Jan", "Kowalski", "Kowalski Spółka Z.O.O",
                 "Mickiewicza", "102", "33-100", "Tarnów", "1234567890");
+        Contractor sampleContractor2 = new Contractor("Adam", "Kawa", "Kawa INC.",
+                "Krakowska", "156", "33-534", "Wrocław", "098343242");
         
         contractors.add(columnsName);
         contractors.add(sampleContractor);
@@ -185,6 +228,8 @@ public class ContractorsPanel extends JPanel {
             fileWriter.append(columnsName.toString());
             fileWriter.append(NEW_LINE_SEPARATOR);
             fileWriter.append(sampleContractor.toString());
+            fileWriter.append(NEW_LINE_SEPARATOR);
+            fileWriter.append(sampleContractor2.toString());
             fileWriter.append(NEW_LINE_SEPARATOR);
             
             System.out.println("Sample CSV file was created.");
@@ -202,8 +247,6 @@ public class ContractorsPanel extends JPanel {
         
         
     }
-    
-    
     
     
     // test gui show
