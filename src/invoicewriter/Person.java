@@ -31,6 +31,7 @@ public abstract class Person {
     
     @Override
     public String toString() {
+        // used for easy CSV file creation
         return name+","+surname+","+companyName+","+streetName+","+homeNo+ ","+postCode+","+city+","+nipNo;
     }
 }
