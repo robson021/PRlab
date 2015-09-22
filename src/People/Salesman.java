@@ -19,7 +19,5 @@ public class Salesman extends Person{
                 String pn, String bn, String bAccN) {
         super(n, sn, cn, strName, hn, pc, ct, nip);
         phoneNo=pn; bankName=bn; bankAccNo=bAccN;
-        }
-    
-    
+        }    
 }

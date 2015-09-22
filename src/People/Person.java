@@ -24,7 +24,7 @@ public abstract class Person {
     public void printInfo () {
         System.out.println(name + " " + surname);
         System.out.println(companyName);
-        System.out.println("ul. "  + streetName + " " + homeNo + ", " + city);
+        System.out.println("ul. " + streetName + " " + homeNo + ", " + city);
         System.out.println(postCode);
         System.out.println("NIP: " + nipNo);
     }

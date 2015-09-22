@@ -9,6 +9,7 @@ import People.Contractor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,10 +51,11 @@ public class ContractorsPanel extends JPanel {
     private JTextField cityField;
     private JTextField codeField;
     private JTextField nipField;
-    private JTextField regonField;
+    //private JTextField regonField;
     private JComboBox contractorsBox;
-    private List<Contractor> contractors;   
+    private List<Contractor> contractors;       
     
+    private int index;
     
     // constructor
     public ContractorsPanel() {
@@ -107,11 +109,11 @@ public class ContractorsPanel extends JPanel {
         gbc.gridx++;
         add (nipField, gbc);
         
-        gbc.gridx=0; gbc.gridy++;
-        regonField = new JTextField(DEFAULT_COLUMN_SIZE);
-        add (new JLabel("Regon:"), gbc);
-        gbc.gridx++;
-        add (regonField, gbc);
+//        gbc.gridx=0; gbc.gridy++;
+//        regonField = new JTextField(DEFAULT_COLUMN_SIZE);
+//        add (new JLabel("Regon:"), gbc);
+//        gbc.gridx++;
+//        add (regonField, gbc);
         
         // buttons
         gbc.gridx=0; gbc.gridy++;
@@ -131,10 +133,9 @@ public class ContractorsPanel extends JPanel {
         if(!f.exists() || f.isDirectory())
             initTestContractorsList();
         
-        loadContractors();
-        
-        // TODO contractors box               
+        loadContractors();                   
         initContractorsBox();
+        index = contractors.size();
         
         gbc.gridx=0; gbc.gridy++;
         gbc.fill=GridBagConstraints.HORIZONTAL;
@@ -156,17 +157,19 @@ public class ContractorsPanel extends JPanel {
         add (editButton, gbc);
         gbc.gridy++;
         add (deleteButton, gbc);
+        
+        addButton.addActionListener(new AddContractorHandler());
     }   
 
     private void initContractorsBox() {
-        ArrayList<String> names = new ArrayList<>();
-        int i=0;
+        List<String> names = new ArrayList<>();
+        //int i=0;
         for (Contractor c : contractors) {
-            if (i != 0) {
+            //if (i != 0) {
                 String[] s = c.toString().split(COMMA_DELIMITER);
                 names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city
-            }
-            i++;
+           // }
+           // i++;
         }
         contractorsBox = new JComboBox(names.toArray());
     }
@@ -205,20 +208,20 @@ public class ContractorsPanel extends JPanel {
     }
     
     private void initTestContractorsList() {
-        Contractor columnsName = new Contractor("Name", "Surname", "CompanyName", "Street", "HomeNo", "PostCode", "City", "NIP");
+       // Contractor columnsName = new Contractor("Name", "Surname", "CompanyName", "Street", "HomeNo", "PostCode", "City", "NIP");
         Contractor sampleContractor = new Contractor("Jan", "Kowalski", "Kowalski Spółka Z.O.O",
                 "Mickiewicza", "102", "33-100", "Tarnów", "1234567890");
         Contractor sampleContractor2 = new Contractor("Adam", "Kawa", "Kawa INC.",
                 "Krakowska", "156", "33-534", "Wrocław", "098343242");
         
-        contractors.add(columnsName);
+        //contractors.add(columnsName);
         contractors.add(sampleContractor);
         FileWriter fileWriter = null;        
         try {
             fileWriter = new FileWriter(FILE_NAME);
                         
-            fileWriter.append(columnsName.toString());
-            fileWriter.append(NEW_LINE_SEPARATOR);
+            //fileWriter.append(columnsName.toString());
+            //fileWriter.append(NEW_LINE_SEPARATOR);
             fileWriter.append(sampleContractor.toString());
             fileWriter.append(NEW_LINE_SEPARATOR);
             fileWriter.append(sampleContractor2.toString());
@@ -240,6 +243,71 @@ public class ContractorsPanel extends JPanel {
         
     }
     
+    private class AddContractorHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            // check if all fields are not null
+            String name = nameField.getText();
+            String surname = surnameField.getText();
+            String company = companyField.getText();
+            String[] streetAndHouseNO = streetField.getText().split(" ");            
+            String city = cityField.getText();
+            String postCode = codeField.getText();
+            String NIP = nipField.getText();
+            //String regon = regonField.getText();
+            
+            if (name==null || surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
+                    city==null || postCode==null || NIP==null) {
+                //TODO display error
+                return;
+            }
+            
+            ArrayList people = (ArrayList) contractors;            
+            Contractor contractor = new Contractor(name, surname, city, streetAndHouseNO[0],
+                    streetAndHouseNO[1], postCode, city, NIP);
+            
+            people.add(index, contractor);
+            index = people.size();
+            addNewContractorToCSVfile(contractor);
+            initContractorsBox();
+            clearBoxes();
+        }
+        
+    }
+    
+    private void addNewContractorToCSVfile (Contractor contractor) {
+        FileWriter fileWriter = null;   
+        System.out.println(contractor.toString());
+        try {
+            fileWriter = new FileWriter(FILE_NAME);
+            for (Contractor c : contractors) {
+                fileWriter.append(c.toString());
+                fileWriter.append(NEW_LINE_SEPARATOR);
+            }            
+            fileWriter.append(contractor.toString());
+            fileWriter.append(NEW_LINE_SEPARATOR);
+        } catch (IOException ex) {
+            Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {fileWriter.flush();
+                fileWriter.close();
+                System.out.println("Contractors updated");
+            } catch (IOException ex) {
+                Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    private void clearBoxes() {
+        nameField.setText("");
+        surnameField.setText("");
+        companyField.setText("");
+        streetField.setText("");
+        cityField.setText("");
+        codeField.setText("");
+        nipField.setText("");
+        //regonField.setText("");
+    }
     
     // test gui show
 /*    public void createAndShowGUI () {
