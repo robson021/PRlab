@@ -60,7 +60,7 @@ public class ContractorsPanel extends JPanel {
     private JComboBox contractorsBox;
     private List<Contractor> contractors;       
     
-    private int index;
+    //private int index;
     
     // constructor
     public ContractorsPanel() {
@@ -138,7 +138,7 @@ public class ContractorsPanel extends JPanel {
         if(!f.exists() || f.isDirectory())
             initTestContractorsList();
                 
-        index = contractors.size();
+        //index = contractors.size();
         
         gbc.gridx=0; gbc.gridy++;
         gbc.fill=GridBagConstraints.HORIZONTAL;
@@ -275,19 +275,19 @@ public class ContractorsPanel extends JPanel {
                 return;
             }
             
-            ArrayList people = (ArrayList) contractors;            
+            //ArrayList people = (ArrayList) contractors;            
             Contractor contractor = new Contractor(name, surname, city, streetAndHouseNO[0],
                     streetAndHouseNO[1], postCode, city, NIP);
             System.out.println("Adding:\n" + contractor.toString());
-            people.add(index, contractor);
-            index = people.size();
+            //people.add(index, contractor);
+            //index = people.size();
+            contractors.add(contractor);
             updateCSVfile();
             initContractorsBox();
             clearBoxes();           
             SwingUtilities.invokeLater(() -> {
                 updateMessage("Cotractors updated", Color.green.darker().darker());
-            });
-            //thisPanel.repaint();
+            });            
         }
         
     }
