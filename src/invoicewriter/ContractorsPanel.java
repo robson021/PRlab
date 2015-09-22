@@ -5,8 +5,7 @@
  */
 package invoicewriter;
 
-import java.awt.Component;
-import java.awt.Dimension;
+import People.Contractor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -20,17 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 
 /**
  *
@@ -144,10 +138,13 @@ public class ContractorsPanel extends JPanel {
         
         gbc.gridx=0; gbc.gridy++;
         gbc.fill=GridBagConstraints.HORIZONTAL;
+        int default_width = gbc.gridwidth;
+        gbc.gridwidth=3;
         add (new JSeparator(), gbc);
-        gbc.gridx++;
-        add (new JSeparator(), gbc);
+        //gbc.gridx++;
+        //add (new JSeparator(), gbc);
         gbc.gridx=0;
+        gbc.gridwidth=default_width;
         gbc.fill=GridBagConstraints.NONE;
         gbc.gridy++;
         add (contractorsBox, gbc);
@@ -174,11 +171,6 @@ public class ContractorsPanel extends JPanel {
         contractorsBox = new JComboBox(names.toArray());
     }
     
-    private class Contractor extends Person{
-        public Contractor(String n, String sn, String cn, String strName, String hn, String pc, String ct, String nip) {
-            super(n, sn, cn, strName, hn, pc, ct, nip);
-        }        
-    }
     
     private void loadContractors () {        
         BufferedReader fileReader = null;
