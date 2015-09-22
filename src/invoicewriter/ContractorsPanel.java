@@ -6,6 +6,8 @@
 package invoicewriter;
 
 import People.Contractor;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -20,12 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -42,7 +46,8 @@ public class ContractorsPanel extends JPanel {
     private JButton backButton;
     private JButton editButton;
     private JButton deleteButton;
-    private JPanel thisPanel;    
+    private JPanel thisPanel;
+    private JLabel messageLabel;
     
     private JTextField nameField;
     private JTextField surnameField;
@@ -132,23 +137,26 @@ public class ContractorsPanel extends JPanel {
         File f = new File(FILE_NAME);
         if(!f.exists() || f.isDirectory())
             initTestContractorsList();
-        
-        loadContractors();                   
-        initContractorsBox();
+                
         index = contractors.size();
         
         gbc.gridx=0; gbc.gridy++;
         gbc.fill=GridBagConstraints.HORIZONTAL;
-        int default_width = gbc.gridwidth;
+        final int DEFAULT_WIDTH = gbc.gridwidth;
         gbc.gridwidth=3;
         add (new JSeparator(), gbc);
         //gbc.gridx++;
         //add (new JSeparator(), gbc);
         gbc.gridx=0;
-        gbc.gridwidth=default_width;
+        gbc.gridwidth=DEFAULT_WIDTH;
         gbc.fill=GridBagConstraints.NONE;
         gbc.gridy++;
+        contractorsBox = new JComboBox();
+        contractorsBox.setPreferredSize(new Dimension(150, 30));
         add (contractorsBox, gbc);
+        
+        loadContractors();                   
+        initContractorsBox();
         
         editButton = new JButton("Edytuj");
         deleteButton = new JButton("Usuń");
@@ -159,6 +167,12 @@ public class ContractorsPanel extends JPanel {
         add (deleteButton, gbc);
         
         addButton.addActionListener(new AddContractorHandler());
+        
+        gbc.gridx=0; gbc.gridy++;
+        messageLabel = new JLabel(" ");        
+        gbc.gridwidth=3;
+        add (messageLabel, gbc);
+        gbc.gridwidth=DEFAULT_WIDTH;
     }   
 
     private void initContractorsBox() {
@@ -170,10 +184,9 @@ public class ContractorsPanel extends JPanel {
                 names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city
            // }
            // i++;
-        }
-        contractorsBox = new JComboBox(names.toArray());
-    }
-    
+        }     
+        contractorsBox.setModel(new DefaultComboBoxModel(names.toArray()));
+    }    
     
     private void loadContractors () {        
         BufferedReader fileReader = null;
@@ -245,8 +258,7 @@ public class ContractorsPanel extends JPanel {
     
     private class AddContractorHandler implements ActionListener {
         @Override
-        public void actionPerformed(ActionEvent ae) {
-            // check if all fields are not null
+        public void actionPerformed(ActionEvent ae) {                        
             String name = nameField.getText();
             String surname = surnameField.getText();
             String company = companyField.getText();
@@ -256,45 +268,46 @@ public class ContractorsPanel extends JPanel {
             String NIP = nipField.getText();
             //String regon = regonField.getText();
             
-            if (name==null || surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
+            if (!streetField.getText().contains(" ") || name==null ||
+                    surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
                     city==null || postCode==null || NIP==null) {
-                //TODO display error
+                updateMessage("Invalid values", Color.red);
                 return;
             }
             
             ArrayList people = (ArrayList) contractors;            
             Contractor contractor = new Contractor(name, surname, city, streetAndHouseNO[0],
                     streetAndHouseNO[1], postCode, city, NIP);
-            
+            System.out.println("Adding:\n" + contractor.toString());
             people.add(index, contractor);
             index = people.size();
-            addNewContractorToCSVfile(contractor);
+            updateCSVfile();
             initContractorsBox();
-            clearBoxes();
+            clearBoxes();           
+            SwingUtilities.invokeLater(() -> {
+                updateMessage("Cotractors updated", Color.green.darker().darker());
+            });
+            //thisPanel.repaint();
         }
         
     }
     
-    private void addNewContractorToCSVfile (Contractor contractor) {
-        FileWriter fileWriter = null;   
-        System.out.println(contractor.toString());
+    private void updateCSVfile () {
+        FileWriter fileWriter = null;           
         try {
             fileWriter = new FileWriter(FILE_NAME);
             for (Contractor c : contractors) {
                 fileWriter.append(c.toString());
                 fileWriter.append(NEW_LINE_SEPARATOR);
-            }            
-            fileWriter.append(contractor.toString());
-            fileWriter.append(NEW_LINE_SEPARATOR);
+            } 
         } catch (IOException ex) {
             Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {fileWriter.flush();
                 fileWriter.close();
-                System.out.println("Contractors updated");
             } catch (IOException ex) {
                 Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            }            
         }
     }
     
@@ -307,6 +320,11 @@ public class ContractorsPanel extends JPanel {
         codeField.setText("");
         nipField.setText("");
         //regonField.setText("");
+    }
+    
+    private void updateMessage (String msg, Color c) {        
+        messageLabel.setForeground(c);
+        messageLabel.setText(msg);        
     }
     
     // test gui show

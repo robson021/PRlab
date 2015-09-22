@@ -94,6 +94,7 @@ public class InvoiceWriter extends JFrame {
                 mainFrame = new InvoiceWriter();
                 mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 mainFrame.setLocationByPlatform(true);
+                mainFrame.setResizable(false);
                 mainFrame.setVisible(true); 
                 
                 // tests
