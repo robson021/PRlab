@@ -9,6 +9,7 @@ import com.alee.laf.WebLookAndFeel;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
@@ -29,7 +30,8 @@ public class InvoiceWriter extends JFrame {
     
     private static InvoiceWriter mainFrame;
     private JPanel mainPanel;
-    private JPanel contractorsPanel;    
+    private JPanel contractorsPanel;  
+    private JPanel salesmenPanel;
     private static Map <String, JPanel> panelMap; 
    
     // constructor
@@ -41,18 +43,21 @@ public class InvoiceWriter extends JFrame {
         
         mainPanel = new JPanel(new FlowLayout());
         contractorsPanel = new ContractorsPanel();
+        salesmenPanel = new SalesmenPanel();
         
         panelMap.put("mainPanel", mainPanel);
         panelMap.put("contractorsPanel", contractorsPanel);
+        panelMap.put("salesmenPanel", salesmenPanel);
         
-        this.initMainPanel();
+        initMainPanel();
         
         this.setJMenuBar(new MenuBar_());
-        this.getContentPane().add (mainPanel);    
+        this.getContentPane().add (mainPanel);   
+        this.getContentPane().add (contractorsPanel); 
         pack();
         repaint();
         revalidate();
-        this.getContentPane().add (contractorsPanel);                 
+                        
         
         //this.pack();
     }
@@ -78,6 +83,12 @@ public class InvoiceWriter extends JFrame {
             swapPanel("contractorsPanel");          
         });
         mainPanel.add (contractorsButton);
+        
+        JButton salesmenButton = new JButton("Sprzedawcy");
+        salesmenButton.addActionListener((ActionEvent ae) -> {
+            swapPanel("salesmenPanel");
+        });
+        mainPanel.add(salesmenButton);
         
     }
         

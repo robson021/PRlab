@@ -20,4 +20,9 @@ public class Salesman extends Person{
         super(n, sn, cn, strName, hn, pc, ct, nip);
         phoneNo=pn; bankName=bn; bankAccNo=bAccN;
         }    
+    
+    @Override
+    public String toString() {
+        return super.toString()+","+phoneNo+","+bankName+","+bankAccNo;
+    }
 }

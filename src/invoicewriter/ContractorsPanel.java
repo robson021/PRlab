@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -138,7 +137,7 @@ public class ContractorsPanel extends JPanel {
         });        
         contractors = new ArrayList<>();
         File f = new File(FILE_NAME);
-        if(!f.exists() || f.isDirectory())
+        if(!f.exists() || f.isDirectory() )
             initTestContractorsList();
                 
         //index = contractors.size();
@@ -240,7 +239,7 @@ public class ContractorsPanel extends JPanel {
             fileWriter.append(sampleContractor2.toString());
             fileWriter.append(NEW_LINE_SEPARATOR);
             
-            System.out.println("Sample CSV file was created.");
+            System.out.println("Sample contractors CSV file was created.");
         } catch (IOException ex) {
             Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -338,10 +337,7 @@ public class ContractorsPanel extends JPanel {
             } else { // button was clicked 2nd time
                 editButton.setText("Edytuj");
                 deleteButton.setText("Usuń");
-                changeContractorValues();
-                updateCSVfile();
-                initContractorsBox();
-                updateMessage("Zmieniono dane kontrahenta", Color.green.darker().darker());
+                changeContractorValues(); 
             }
         }
 
@@ -357,7 +353,31 @@ public class ContractorsPanel extends JPanel {
             companyField.setText(c.getCompanyName());
         }
 
-        private void changeContractorValues() { // TODO
+        private void changeContractorValues() { 
+            String name = nameField.getText();
+            String surname = surnameField.getText();
+            String company = companyField.getText();
+            String[] streetAndHouseNO = streetField.getText().split(" ");            
+            String city = cityField.getText();
+            String postCode = codeField.getText();
+            String NIP = nipField.getText();
+            
+            if (!streetField.getText().contains(" ") || name==null ||
+                    surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
+                    city==null || postCode==null || NIP==null) {
+                updateMessage("Nieprawidłowe wartości", Color.red);
+                return;
+            }         
+                     
+            Contractor contractor = new Contractor(name, surname, city, streetAndHouseNO[0],
+                    streetAndHouseNO[1], postCode, city, NIP);
+            //System.out.println("Adding:\n" + contractor.toString());
+            int index = contractorsBox.getSelectedIndex();
+            contractors.set(index, contractor);
+            updateCSVfile();
+            initContractorsBox();
+            clearTextFields();   
+            updateMessage("Zmieniono dane kontrahenta", Color.green.darker().darker());
         }
         
     }
@@ -369,6 +389,7 @@ public class ContractorsPanel extends JPanel {
                 deleteContractor();
                 updateCSVfile();
                 initContractorsBox();
+                updateMessage("Usunięto kontrahenta", Color.black);
             } else { // rollback edit changes
                 clearTextFields();
                 isEditButtonClicked = !isEditButtonClicked;
@@ -378,7 +399,9 @@ public class ContractorsPanel extends JPanel {
             }         
         }
 
-        private void deleteContractor() { // TODO
+        private void deleteContractor() { 
+            int index = contractorsBox.getSelectedIndex();
+            contractors.remove(index);            
         }
         
     }
