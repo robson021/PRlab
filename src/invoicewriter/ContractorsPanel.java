@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -41,6 +42,8 @@ public class ContractorsPanel extends JPanel {
     //static final String FILE_HEADER = "id,firstName,lastName,gender,age";
     public static final String NEW_LINE_SEPARATOR = "\n";
     private static final String FILE_NAME = "contractorsList.csv";
+    
+    private boolean isEditButtonClicked = false;
 
     private JButton addButton;
     private JButton backButton;
@@ -159,7 +162,9 @@ public class ContractorsPanel extends JPanel {
         initContractorsBox();
         
         editButton = new JButton("Edytuj");
-        deleteButton = new JButton("Usuń");
+        deleteButton = new JButton("Usuń");        
+        editButton.addActionListener(new EditButtonHandler());
+        deleteButton.addActionListener(new DeleteButtonHandler());
         
         gbc.gridx++;        
         add (editButton, gbc);
@@ -178,27 +183,23 @@ public class ContractorsPanel extends JPanel {
     private void initContractorsBox() {
         List<String> names = new ArrayList<>();
         //int i=0;
-        for (Contractor c : contractors) {
-            //if (i != 0) {
+        for (Contractor c : contractors) {            
                 String[] s = c.toString().split(COMMA_DELIMITER);
-                names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city
-           // }
-           // i++;
+                names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city           
         }     
         contractorsBox.setModel(new DefaultComboBoxModel(names.toArray()));
     }    
     
     private void loadContractors () {        
         BufferedReader fileReader = null;
-        contractors = new ArrayList<>();
-        
+        contractors = new ArrayList<>();        
         String line = "";        
         try {
             fileReader = new BufferedReader(new FileReader(FILE_NAME));
             while ((line = fileReader.readLine()) != null) {
                 String[] values = line.split(COMMA_DELIMITER);                
                 if (values.length > 0) { // add new element to list
-                    contractors.add(new Contractor(values[0], values[1 ], values[2], values[3], values[4],
+                    contractors.add(new Contractor(values[0], values[1], values[2], values[3], values[4],
                             values[5], values[6], values[7]));     
                 }
             }
@@ -218,8 +219,7 @@ public class ContractorsPanel extends JPanel {
         for (Contractor c : contractors) {
             System.out.println(c.toString());
         }
-    }
-    
+    }    
     private void initTestContractorsList() {
        // Contractor columnsName = new Contractor("Name", "Surname", "CompanyName", "Street", "HomeNo", "PostCode", "City", "NIP");
         Contractor sampleContractor = new Contractor("Jan", "Kowalski", "Kowalski Spółka Z.O.O",
@@ -254,7 +254,7 @@ public class ContractorsPanel extends JPanel {
         }
         
         
-    }
+    }    
     
     private class AddContractorHandler implements ActionListener {
         @Override
@@ -271,10 +271,9 @@ public class ContractorsPanel extends JPanel {
             if (!streetField.getText().contains(" ") || name==null ||
                     surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
                     city==null || postCode==null || NIP==null) {
-                updateMessage("Invalid values", Color.red);
+                updateMessage("Nieprawidłowe wartości", Color.red);
                 return;
-            }
-            
+            }            
             //ArrayList people = (ArrayList) contractors;            
             Contractor contractor = new Contractor(name, surname, city, streetAndHouseNO[0],
                     streetAndHouseNO[1], postCode, city, NIP);
@@ -284,9 +283,9 @@ public class ContractorsPanel extends JPanel {
             contractors.add(contractor);
             updateCSVfile();
             initContractorsBox();
-            clearBoxes();           
+            clearTextFields();           
             SwingUtilities.invokeLater(() -> {
-                updateMessage("Cotractors updated", Color.green.darker().darker());
+                updateMessage("Zaktualizowano kontrahentów", Color.green.darker().darker());
             });            
         }
         
@@ -311,7 +310,7 @@ public class ContractorsPanel extends JPanel {
         }
     }
     
-    private void clearBoxes() {
+    private void clearTextFields() {
         nameField.setText("");
         surnameField.setText("");
         companyField.setText("");
@@ -325,6 +324,63 @@ public class ContractorsPanel extends JPanel {
     private void updateMessage (String msg, Color c) {        
         messageLabel.setForeground(c);
         messageLabel.setText(msg);        
+    }
+    
+    private class EditButtonHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            isEditButtonClicked = !isEditButtonClicked;            
+            if (isEditButtonClicked) { // edit button has been just clicked.
+                editButton.setText("Zatwierdź"); // change text to "commit changes"
+                deleteButton.setText("Anuluj");
+                fillTextFields();      
+                updateMessage("Tryb edytowania", Color.black);                
+            } else { // button was clicked 2nd time
+                editButton.setText("Edytuj");
+                deleteButton.setText("Usuń");
+                changeContractorValues();
+                updateCSVfile();
+                initContractorsBox();
+                updateMessage("Zmieniono dane kontrahenta", Color.green.darker().darker());
+            }
+        }
+
+        private void fillTextFields() {     
+            int index = contractorsBox.getSelectedIndex();
+            Contractor c = contractors.get(index);
+            nameField.setText(c.getName());
+            surnameField.setText(c.getSurname());
+            cityField.setText(c.getCity());
+            nipField.setText(c.getNIPnumber());
+            streetField.setText(c.getStreet()+" "+c.getHouseNumber()); 
+            codeField.setText(c.getPostCode());
+            companyField.setText(c.getCompanyName());
+        }
+
+        private void changeContractorValues() { // TODO
+        }
+        
+    }
+    
+    private class DeleteButtonHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent ae) { // TODO
+            if (!isEditButtonClicked) { // normal delete mode
+                deleteContractor();
+                updateCSVfile();
+                initContractorsBox();
+            } else { // rollback edit changes
+                clearTextFields();
+                isEditButtonClicked = !isEditButtonClicked;
+                editButton.setText("Edytuj");
+                deleteButton.setText("Usuń");
+                updateMessage("Anulowano", Color.black);
+            }         
+        }
+
+        private void deleteContractor() { // TODO
+        }
+        
     }
     
     // test gui show
