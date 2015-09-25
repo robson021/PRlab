@@ -11,18 +11,19 @@ package People;
  */
 public class Salesman extends Person{
 
+    private String regon;
     private String phoneNo;
     private String bankName;
     private String bankAccNo;
 
     public Salesman(String n, String sn, String cn, String strName, String hn, String pc, String ct, String nip,
-                String pn, String bn, String bAccN) {
+                String reg, String pn, String bn, String bAccN) {
         super(n, sn, cn, strName, hn, pc, ct, nip);
-        phoneNo=pn; bankName=bn; bankAccNo=bAccN;
+        regon=reg; phoneNo=pn; bankName=bn; bankAccNo=bAccN;
         }    
     
     @Override
     public String toString() {
-        return super.toString()+","+phoneNo+","+bankName+","+bankAccNo;
+        return super.toString()+","+regon+","+phoneNo+","+bankName+","+bankAccNo;
     }
 }

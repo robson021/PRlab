@@ -94,7 +94,7 @@ public class ContractorsPanel extends JPanel {
         
         gbc.gridx=0; gbc.gridy++;
         streetField = new JTextField(DEFAULT_COLUMN_SIZE);
-        add (new JLabel("Ulica i numer domu:"), gbc);
+        add (new JLabel("Ulica, numer domu:"), gbc);
         gbc.gridx++;
         add (streetField, gbc);
         
@@ -180,8 +180,7 @@ public class ContractorsPanel extends JPanel {
     }   
 
     private void initContractorsBox() {
-        List<String> names = new ArrayList<>();
-        //int i=0;
+        List<String> names = new ArrayList<>();    
         for (Contractor c : contractors) {            
                 String[] s = c.toString().split(COMMA_DELIMITER);
                 names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city           
@@ -261,13 +260,13 @@ public class ContractorsPanel extends JPanel {
             String name = nameField.getText();
             String surname = surnameField.getText();
             String company = companyField.getText();
-            String[] streetAndHouseNO = streetField.getText().split(" ");            
+            String[] streetAndHouseNO = streetField.getText().split(", ");            
             String city = cityField.getText();
             String postCode = codeField.getText();
             String NIP = nipField.getText();
             //String regon = regonField.getText();
             
-            if (!streetField.getText().contains(" ") || name==null ||
+            if (!streetField.getText().contains(", ") || name==null ||
                     surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
                     city==null || postCode==null || NIP==null) {
                 updateMessage("Nieprawidłowe wartości", Color.red);
@@ -283,9 +282,9 @@ public class ContractorsPanel extends JPanel {
             updateCSVfile();
             initContractorsBox();
             clearTextFields();           
-            SwingUtilities.invokeLater(() -> {
-                updateMessage("Zaktualizowano kontrahentów", Color.green.darker().darker());
-            });            
+            //SwingUtilities.invokeLater(() -> {
+                updateMessage("Dodano nowego kontrahenta", Color.green.darker().darker());
+            //});            
         }
         
     }
@@ -348,7 +347,7 @@ public class ContractorsPanel extends JPanel {
             surnameField.setText(c.getSurname());
             cityField.setText(c.getCity());
             nipField.setText(c.getNIPnumber());
-            streetField.setText(c.getStreet()+" "+c.getHouseNumber()); 
+            streetField.setText(c.getStreet()+", "+c.getHouseNumber()); 
             codeField.setText(c.getPostCode());
             companyField.setText(c.getCompanyName());
         }
@@ -357,12 +356,12 @@ public class ContractorsPanel extends JPanel {
             String name = nameField.getText();
             String surname = surnameField.getText();
             String company = companyField.getText();
-            String[] streetAndHouseNO = streetField.getText().split(" ");            
+            String[] streetAndHouseNO = streetField.getText().split(", ");            
             String city = cityField.getText();
             String postCode = codeField.getText();
             String NIP = nipField.getText();
             
-            if (!streetField.getText().contains(" ") || name==null ||
+            if (!streetField.getText().contains(", ") || name==null ||
                     surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
                     city==null || postCode==null || NIP==null) {
                 updateMessage("Nieprawidłowe wartości", Color.red);

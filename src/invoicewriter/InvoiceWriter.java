@@ -9,7 +9,6 @@ import com.alee.laf.WebLookAndFeel;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
@@ -54,6 +53,7 @@ public class InvoiceWriter extends JFrame {
         this.setJMenuBar(new MenuBar_());
         this.getContentPane().add (mainPanel);   
         this.getContentPane().add (contractorsPanel); 
+        this.getContentPane().add(salesmenPanel);
         pack();
         repaint();
         revalidate();
@@ -63,6 +63,7 @@ public class InvoiceWriter extends JFrame {
     }
     
     public static void swapPanel (String panelName) {
+        System.out.println("Swaping panel to: " + panelName);
         for (JPanel p : panelMap.values()) {
             p.setVisible(false);
         }
@@ -70,7 +71,7 @@ public class InvoiceWriter extends JFrame {
         p.setVisible(true);        
         mainFrame.repaint();
         mainFrame.revalidate();
-        mainFrame.pack();
+        mainFrame.pack();  
     }
     
     public static InvoiceWriter getInstance() {
@@ -88,28 +89,23 @@ public class InvoiceWriter extends JFrame {
         salesmenButton.addActionListener((ActionEvent ae) -> {
             swapPanel("salesmenPanel");
         });
-        mainPanel.add(salesmenButton);
-        
+        mainPanel.add(salesmenButton);        
     }
         
     
     public static void main(String[] args) 
     {     
         // Install WebLaF as application L&F
-        WebLookAndFeel.install ();
-       
-        
+        WebLookAndFeel.install ();        
         SwingUtilities.invokeLater ( new Runnable ()
         {
-            public void run () {
+            public void run () 
+            {
                 mainFrame = new InvoiceWriter();
                 mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 mainFrame.setLocationByPlatform(true);
                 mainFrame.setResizable(false);
-                mainFrame.setVisible(true); 
-                
-                // tests
-                //new ContractorsPanel(new InvoiceWriter()).createAndShowGUI();
+                mainFrame.setVisible(true);
             }
         });                       
     }    
