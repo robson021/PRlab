@@ -96,7 +96,7 @@ public class InvoiceWriter extends JFrame {
         });
         mainPanel.add(salesmenButton);
         
-        JButton servicesButton = new JButton("Usługi/Towary");
+        JButton servicesButton = new JButton("Usługi / Towary");
         servicesButton.addActionListener((ActionEvent ae) -> {
             swapPanel("servicesPanel");
         });        
