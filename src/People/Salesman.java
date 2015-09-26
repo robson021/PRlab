@@ -26,4 +26,16 @@ public class Salesman extends Person{
     public String toString() {
         return super.toString()+","+regon+","+phoneNo+","+bankName+","+bankAccNo;
     }
+    public String getRegon() {
+        return regon;
+    }
+    public String getPhoneNo() {
+        return phoneNo;
+    }
+    public String getBankName() {
+        return bankName;
+    }
+    public String getBankAccNo() {
+        return bankAccNo;
+    }
 }

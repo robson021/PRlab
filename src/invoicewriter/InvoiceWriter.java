@@ -9,6 +9,7 @@ import com.alee.laf.WebLookAndFeel;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
@@ -31,6 +32,7 @@ public class InvoiceWriter extends JFrame {
     private JPanel mainPanel;
     private JPanel contractorsPanel;  
     private JPanel salesmenPanel;
+    private JPanel servicesPanel;
     private static Map <String, JPanel> panelMap; 
    
     // constructor
@@ -38,15 +40,17 @@ public class InvoiceWriter extends JFrame {
         
         this.setLayout(new CardLayout());
         this.setTitle("Invoice Writer by Robert Nowak");
-        panelMap = new HashMap<>(6);
+        panelMap = new HashMap<>(8);
         
         mainPanel = new JPanel(new FlowLayout());
         contractorsPanel = new ContractorsPanel();
         salesmenPanel = new SalesmenPanel();
+        servicesPanel = new ServicesPanel();
         
         panelMap.put("mainPanel", mainPanel);
         panelMap.put("contractorsPanel", contractorsPanel);
         panelMap.put("salesmenPanel", salesmenPanel);
+        panelMap.put("servicesPanel", servicesPanel);
         
         initMainPanel();
         
@@ -54,6 +58,7 @@ public class InvoiceWriter extends JFrame {
         this.getContentPane().add (mainPanel);   
         this.getContentPane().add (contractorsPanel); 
         this.getContentPane().add(salesmenPanel);
+        this.getContentPane().add(servicesPanel);
         pack();
         repaint();
         revalidate();
@@ -63,7 +68,7 @@ public class InvoiceWriter extends JFrame {
     }
     
     public static void swapPanel (String panelName) {
-        System.out.println("Swaping panel to: " + panelName);
+        //System.out.println("Swapping panel to: " + panelName);
         for (JPanel p : panelMap.values()) {
             p.setVisible(false);
         }
@@ -89,14 +94,21 @@ public class InvoiceWriter extends JFrame {
         salesmenButton.addActionListener((ActionEvent ae) -> {
             swapPanel("salesmenPanel");
         });
-        mainPanel.add(salesmenButton);        
+        mainPanel.add(salesmenButton);
+        
+        JButton servicesButton = new JButton("Usługi/Towary");
+        servicesButton.addActionListener((ActionEvent ae) -> {
+            swapPanel("servicesPanel");
+        });        
+        mainPanel.add(servicesButton);
     }
         
     
     public static void main(String[] args) 
     {     
-        // Install WebLaF as application L&F
-        WebLookAndFeel.install ();        
+        System.out.println("Installing WebLaF as application L&F...");
+        WebLookAndFeel.install ();   
+        System.out.println("...done");
         SwingUtilities.invokeLater ( new Runnable ()
         {
             public void run () 

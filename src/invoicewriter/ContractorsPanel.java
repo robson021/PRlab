@@ -29,7 +29,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -325,6 +324,7 @@ public class ContractorsPanel extends JPanel {
     }
     
     private class EditButtonHandler implements ActionListener {
+        private int index;
         @Override
         public void actionPerformed(ActionEvent ae) {
             isEditButtonClicked = !isEditButtonClicked;            
@@ -336,6 +336,7 @@ public class ContractorsPanel extends JPanel {
             } else { // button was clicked 2nd time
                 editButton.setText("Edytuj");
                 deleteButton.setText("Usuń");
+                index = contractorsBox.getSelectedIndex();
                 changeContractorValues(); 
             }
         }
@@ -370,8 +371,7 @@ public class ContractorsPanel extends JPanel {
                      
             Contractor contractor = new Contractor(name, surname, city, streetAndHouseNO[0],
                     streetAndHouseNO[1], postCode, city, NIP);
-            //System.out.println("Adding:\n" + contractor.toString());
-            int index = contractorsBox.getSelectedIndex();
+            //System.out.println("Adding:\n" + contractor.toString());            
             contractors.set(index, contractor);
             updateCSVfile();
             initContractorsBox();
@@ -383,7 +383,7 @@ public class ContractorsPanel extends JPanel {
     
     private class DeleteButtonHandler implements ActionListener {
         @Override
-        public void actionPerformed(ActionEvent ae) { // TODO
+        public void actionPerformed(ActionEvent ae) { 
             if (!isEditButtonClicked) { // normal delete mode
                 deleteContractor();
                 updateCSVfile();
@@ -401,8 +401,7 @@ public class ContractorsPanel extends JPanel {
         private void deleteContractor() { 
             int index = contractorsBox.getSelectedIndex();
             contractors.remove(index);            
-        }
-        
+        }        
     }
     
     // test gui show

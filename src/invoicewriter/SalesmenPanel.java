@@ -196,9 +196,9 @@ public class SalesmenPanel extends JPanel {
 
     private void initTestSalesmenList() {
         Salesman salesman = new Salesman("Jacek", "Kaganek", "Kraków", "Mickiewicza", "23",
-                FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME);
+                FILE_NAME, "Rzeszów", FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME);
         Salesman salesman2 = new Salesman("Marcin", "Iwański", "Poznań", "Słowackiego", "56",
-                FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME);
+                FILE_NAME, "Wieliczka", FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME, FILE_NAME);
         
         FileWriter fileWriter = null;        
         try {
@@ -256,21 +256,95 @@ public class SalesmenPanel extends JPanel {
     }
 
     private class EditButtonHandler implements ActionListener {
+        private int index;
         @Override
         public void actionPerformed(ActionEvent ae) {
+            isEditButtonClicked = !isEditButtonClicked;            
+            if (isEditButtonClicked) { // edit button has been just clicked.
+                editButton.setText("Zatwierdź"); // change text to "commit changes"
+                deleteButton.setText("Anuluj");
+                fillTextFields();      
+                updateMessage("Tryb edytowania", Color.black);                
+            } else { // button was clicked 2nd time
+                editButton.setText("Edytuj");
+                deleteButton.setText("Usuń");
+                index = salesmenBox.getSelectedIndex();
+                changeSalesmenValues(); 
+            }
+        }
+
+        private void changeSalesmenValues() {
+            String name = nameField.getText();
+            String surname = surnameField.getText();
+            String company = companyField.getText();
+            String[] streetAndHouseNO = streetField.getText().split(", ");            
+            String city = cityField.getText();
+            String postCode = codeField.getText();
+            String NIP = nipField.getText();
+            String regon = regonField.getText();
+            String phoneNo = phoneNoField.getText();
+            String bankAccNo = bankAccNoField.getText();
+            String bankName = bankNameField.getText();
             
+            if (!streetField.getText().contains(", ") || name==null ||
+                    surname==null || company==null || streetAndHouseNO[0]==null || streetAndHouseNO[1]==null ||
+                    city==null || postCode==null || NIP==null || regon==null ||
+                    phoneNo==null || bankName==null || bankAccNo==null) {
+                updateMessage("Nieprawidłowe wartości", Color.red);
+                return;
+            }            
+            
+            Salesman salesman = new Salesman(name, surname, company, streetAndHouseNO[0], streetAndHouseNO[1],
+                    postCode, city, NIP, regon, phoneNo, bankName, bankAccNo);
+            salesmen.set(index, salesman);
+            updateCSVfile();
+            initSalesmenBox();
+            clearTextFields();
+            updateMessage("Zaktualizowano dane sprzedawcy", Color.green.darker().darker());
+        }
+
+        private void fillTextFields() {
+            int index = salesmenBox.getSelectedIndex();
+            Salesman c = salesmen.get(index);
+            nameField.setText(c.getName());
+            surnameField.setText(c.getSurname());
+            cityField.setText(c.getCity());
+            nipField.setText(c.getNIPnumber());
+            streetField.setText(c.getStreet()+", "+c.getHouseNumber()); 
+            codeField.setText(c.getPostCode());
+            companyField.setText(c.getCompanyName());
+            phoneNoField.setText(c.getPhoneNo());
+            regonField.setText(c.getRegon());
+            bankAccNoField.setText(c.getBankAccNo());
+            bankNameField.setText(c.getBankName());
         }
     }
 
     private class DeleteButtonHandler implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent ae) {
+            if (!isEditButtonClicked) { // normal delete mode
+                deleteSalesman();
+                updateCSVfile();
+                initSalesmenBox();
+                updateMessage("Usunięto sprzedawcę", Color.black);
+            } else { // rollback edit changes
+                clearTextFields();
+                isEditButtonClicked = !isEditButtonClicked;
+                editButton.setText("Edytuj");
+                deleteButton.setText("Usuń");
+                updateMessage("Anulowano", Color.black);
+            }  
+        }
+
+        private void deleteSalesman() {
+            int index = salesmenBox.getSelectedIndex();
+            salesmen.remove(index);
         }
 
     }
 
-    private class AddSalesmanHandler implements ActionListener {
-        
+    private class AddSalesmanHandler implements ActionListener {        
         @Override
         public void actionPerformed(ActionEvent ae) {                        
             String name = nameField.getText();
