@@ -6,10 +6,10 @@
 package invoicewriter;
 
 import com.alee.laf.WebLookAndFeel;
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
@@ -28,7 +28,12 @@ public class InvoiceWriter extends JFrame {
      * @param args the command line arguments - no needed
      */
     
+    public static final int DEFAULT_COLUMN_SIZE = 15;
+    public static final String COMMA_DELIMITER = ",";
+    public static final String NEW_LINE_SEPARATOR = "\n";
+    
     private static InvoiceWriter mainFrame;
+    //private static JFrame loadingFrame;
     private JPanel mainPanel;
     private JPanel contractorsPanel;  
     private JPanel salesmenPanel;
@@ -42,7 +47,7 @@ public class InvoiceWriter extends JFrame {
         this.setTitle("Invoice Writer by Robert Nowak");
         panelMap = new HashMap<>(8);
         
-        mainPanel = new JPanel(new FlowLayout());
+        mainPanel = new JPanel(new BorderLayout());
         contractorsPanel = new ContractorsPanel();
         salesmenPanel = new SalesmenPanel();
         servicesPanel = new ServicesPanel();
@@ -62,9 +67,6 @@ public class InvoiceWriter extends JFrame {
         pack();
         repaint();
         revalidate();
-                        
-        
-        //this.pack();
     }
     
     public static void swapPanel (String panelName) {
@@ -84,28 +86,39 @@ public class InvoiceWriter extends JFrame {
     }    
     
     private void initMainPanel() {
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton contractorsButton = new JButton("Kontrahenci");
         contractorsButton.addActionListener((ActionEvent ae) -> {
             swapPanel("contractorsPanel");          
         });
-        mainPanel.add (contractorsButton);
+        buttonPanel.add (contractorsButton);
         
         JButton salesmenButton = new JButton("Sprzedawcy");
         salesmenButton.addActionListener((ActionEvent ae) -> {
             swapPanel("salesmenPanel");
         });
-        mainPanel.add(salesmenButton);
+        buttonPanel.add(salesmenButton);
         
         JButton servicesButton = new JButton("Usługi / Towary");
         servicesButton.addActionListener((ActionEvent ae) -> {
             swapPanel("servicesPanel");
         });        
-        mainPanel.add(servicesButton);
+        buttonPanel.add(servicesButton);
+        
+        mainPanel.add(buttonPanel, BorderLayout.NORTH);
     }
         
     
     public static void main(String[] args) 
-    {     
+    {           
+//        SwingUtilities.invokeLater(() -> {
+//            loadingFrame = new JFrame("  ");
+//            loadingFrame.add(new JLabel("Wczytywanie programiu..."));
+//            loadingFrame.pack();
+//            //loadingFrame.setLocationRelativeTo(mainFrame);
+//            loadingFrame.setVisible(true);
+//        });
+        
         System.out.println("Installing WebLaF as application L&F...");
         WebLookAndFeel.install ();   
         System.out.println("...done");
@@ -116,7 +129,8 @@ public class InvoiceWriter extends JFrame {
                 mainFrame = new InvoiceWriter();
                 mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 mainFrame.setLocationByPlatform(true);
-                mainFrame.setResizable(false);
+                mainFrame.setResizable(false);     
+                //loadingFrame.dispose();
                 mainFrame.setVisible(true);
             }
         });                       

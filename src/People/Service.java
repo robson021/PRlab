@@ -27,4 +27,16 @@ public class Service {
     public String toString() {
         return name+","+symbol+","+String.valueOf(vatPercentage)+","+String.valueOf(nettoValue);
     }
+    public String getName() {
+        return name;
+    }
+    public String getSymbol() {
+        return symbol;
+    }
+    public String getVatPercentage() {
+        return String.valueOf(vatPercentage);
+    }
+    public String getNetto() {
+        return String.valueOf(nettoValue);
+    }
 }

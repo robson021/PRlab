@@ -34,11 +34,7 @@ import javax.swing.JTextField;
  *
  * @author Robert
  */
-public class SalesmenPanel extends JPanel {
-    public static final int DEFAULT_COLUMN_SIZE = 15;
-    public static final String COMMA_DELIMITER = ",";
-    //static final String FILE_HEADER = "id,firstName,lastName,gender,age";
-    public static final String NEW_LINE_SEPARATOR = "\n";
+public class SalesmenPanel extends JPanel { 
     private static final String FILE_NAME = "salesmenList.csv";
     
     private boolean isEditButtonClicked = false;
@@ -75,66 +71,66 @@ public class SalesmenPanel extends JPanel {
         
         // adding text fields with labels
         add (new JLabel("Imię:"), gbc);        
-        nameField = new JTextField(DEFAULT_COLUMN_SIZE);        
+        nameField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);        
         gbc.gridx++;        
         add (nameField, gbc);
         
-        surnameField = new JTextField(DEFAULT_COLUMN_SIZE);
+        surnameField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         gbc.gridx=0; gbc.gridy++;
         add (new JLabel("Nazwisko:"), gbc);
         gbc.gridx++;
         add (surnameField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        companyField = new JTextField(DEFAULT_COLUMN_SIZE);
+        companyField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Nazwa firmy:"), gbc);
         gbc.gridx++;
         add (companyField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        streetField = new JTextField(DEFAULT_COLUMN_SIZE);
+        streetField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Ulica, numer domu:"), gbc);
         gbc.gridx++;
         add (streetField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        cityField = new JTextField(DEFAULT_COLUMN_SIZE);
+        cityField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Miejscowość:"), gbc);
         gbc.gridx++;
         add (cityField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        codeField = new JTextField(DEFAULT_COLUMN_SIZE);
+        codeField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Kod pocztowy:"), gbc);
         gbc.gridx++;
         add (codeField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        nipField = new JTextField(DEFAULT_COLUMN_SIZE);
+        nipField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("NIP:"), gbc);
         gbc.gridx++;
         add (nipField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        regonField = new JTextField(DEFAULT_COLUMN_SIZE);
+        regonField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Regon:"), gbc);
         gbc.gridx++;
         add (regonField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        phoneNoField = new JTextField(DEFAULT_COLUMN_SIZE);
+        phoneNoField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Nr telefonu:"), gbc);
         gbc.gridx++;
         add (phoneNoField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        bankNameField = new JTextField(DEFAULT_COLUMN_SIZE);
+        bankNameField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Nazwa baku:"), gbc);
         gbc.gridx++;
         add (bankNameField, gbc);
         
         gbc.gridx=0; gbc.gridy++;
-        bankAccNoField = new JTextField(DEFAULT_COLUMN_SIZE);
+        bankAccNoField = new JTextField(InvoiceWriter.DEFAULT_COLUMN_SIZE);
         add (new JLabel("Numer konta bankowego:"), gbc);
         gbc.gridx++;
         add (bankAccNoField, gbc);
@@ -205,9 +201,9 @@ public class SalesmenPanel extends JPanel {
             fileWriter = new FileWriter(FILE_NAME);
             
             fileWriter.append(salesman.toString());
-            fileWriter.append(NEW_LINE_SEPARATOR);
+            fileWriter.append(InvoiceWriter.NEW_LINE_SEPARATOR);
             fileWriter.append(salesman2.toString());
-            fileWriter.append(NEW_LINE_SEPARATOR);
+            fileWriter.append(InvoiceWriter.NEW_LINE_SEPARATOR);
             
             System.out.println("Sample salesmen CSV file was created.");
         } catch (IOException ex) {
@@ -232,7 +228,7 @@ public class SalesmenPanel extends JPanel {
         try {
             fileReader = new BufferedReader(new FileReader(FILE_NAME));
             while ((line = fileReader.readLine()) != null) {
-                String[] values = line.split(COMMA_DELIMITER);                
+                String[] values = line.split(InvoiceWriter.COMMA_DELIMITER);                
                 if (values.length > 0) { // add new element to list
                     salesmen.add(new Salesman(values[0], values[1], values[2], values[3], values[4],
                             values[5], values[6], values[7], values[8], values[9], values[10], values[11]));     
@@ -249,7 +245,7 @@ public class SalesmenPanel extends JPanel {
     private void initSalesmenBox() {
         List<String> names = new ArrayList<>();
         for (Salesman salesman : salesmen) {
-            String[] s = salesman.toString().split(COMMA_DELIMITER);
+            String[] s = salesman.toString().split(InvoiceWriter.COMMA_DELIMITER);
                 names.add((s[0]+" "+" "+s[1]+"; "+s[6])); // name, surname, city  
         }
         salesmenBox.setModel(new DefaultComboBoxModel(names.toArray()));
@@ -258,18 +254,20 @@ public class SalesmenPanel extends JPanel {
     private class EditButtonHandler implements ActionListener {
         private int index;
         @Override
-        public void actionPerformed(ActionEvent ae) {
+        public void actionPerformed(ActionEvent ae) {            
             isEditButtonClicked = !isEditButtonClicked;            
             if (isEditButtonClicked) { // edit button has been just clicked.
+                index = salesmenBox.getSelectedIndex();
                 editButton.setText("Zatwierdź"); // change text to "commit changes"
                 deleteButton.setText("Anuluj");
+                addButton.setEnabled(false);
                 fillTextFields();      
                 updateMessage("Tryb edytowania", Color.black);                
             } else { // button was clicked 2nd time
                 editButton.setText("Edytuj");
-                deleteButton.setText("Usuń");
-                index = salesmenBox.getSelectedIndex();
+                deleteButton.setText("Usuń");                
                 changeSalesmenValues(); 
+                addButton.setEnabled(true);
             }
         }
 
@@ -334,6 +332,7 @@ public class SalesmenPanel extends JPanel {
                 editButton.setText("Edytuj");
                 deleteButton.setText("Usuń");
                 updateMessage("Anulowano", Color.black);
+                addButton.setEnabled(true);
             }  
         }
 
@@ -385,7 +384,7 @@ public class SalesmenPanel extends JPanel {
             fileWriter = new FileWriter(FILE_NAME);
             for (Salesman s : salesmen) {
                 fileWriter.append(s.toString());
-                fileWriter.append(NEW_LINE_SEPARATOR);
+                fileWriter.append(InvoiceWriter.NEW_LINE_SEPARATOR);
             } 
         } catch (IOException ex) {
             Logger.getLogger(ContractorsPanel.class.getName()).log(Level.SEVERE, null, ex);
