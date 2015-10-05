@@ -122,10 +122,9 @@ public class InvoiceWriter extends JFrame {
         System.out.println("Installing WebLaF as application L&F...");
         WebLookAndFeel.install ();   
         System.out.println("...done");
-        SwingUtilities.invokeLater ( new Runnable ()
-        {
-            public void run () 
-            {
+        SwingUtilities.invokeLater (new Runnable() {
+            @Override
+            public void run () {
                 mainFrame = new InvoiceWriter();
                 mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 mainFrame.setLocationByPlatform(true);
