@@ -90,7 +90,7 @@ int main() {
     dane.b=a;
     
     pthread_t watki[k];
-    double x = (b-a)/k; // x przedzialow dla k watkow
+    double x = (b-a)/k; // x-wielkosc przedzialow dla k-watkow
     for(i=0;i<k;i++){
         dane.b += x;
         pthread_create(&watki[i], NULL, watek_licz_pole, &dane);
