@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "pomiar_czasu.h"
+#include <unistd.h>
 
 // build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread
 
