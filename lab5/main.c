@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include "pomiar_czasu.h"
 
 // build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread
 
@@ -52,7 +53,7 @@ void * watek_licz_pole (void *arg) {
   // synchronizacja:
   
   //pthread_mutex_lock (&m);
-  wynik += .5 * S * h;
+  wynik += (.5 * S * h);
   //pthread_mutex_unlock (&m);
   
   
@@ -81,16 +82,18 @@ int main() {
     
     pthread_mutex_init (&m, NULL);
     // sekwencyjnie
+    //inicjuj_czas();
     double w = licz_pole(a, b, n);
-    printf("Wynik calki sekwencyjnie: %f\n", w);
- 
+    printf("\tWynik calki sekwencyjnie: %f\n", w);
+    //drukuj_czas();
     // podzadania na watkow
-    int i, k=5;
+    int i, k=4;
     dane.a=a;
     dane.b=a;
     
     pthread_t watki[k];
     double x = (b-a)/k; // x-wielkosc przedzialow dla k-watkow
+    //inicjuj_czas();
     for(i=0;i<k;i++){
         dane.b += x;
         pthread_create(&watki[i], NULL, watek_licz_pole, &dane);
@@ -101,8 +104,8 @@ int main() {
     for (i=0;i<k;i++) {
         pthread_join(watki[i], NULL);
     }
-    printf("Wynik calki liczonej na %d watkach: %f \n", k, wynik);
-    
+    printf("\tWynik calki liczonej na %d watkach: %f \n", k, wynik);
+    //drukuj_czas();
     pthread_exit(NULL);
     //return (EXIT_SUCCESS);
 }
