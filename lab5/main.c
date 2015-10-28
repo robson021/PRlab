@@ -33,11 +33,18 @@ double licz_pole (int a, int b, int n) {
 
 void * watek_licz_pole (void *arg) {
     
+/*
   Dane *dane = arg;  
   
   double a = dane->a;
   double b = dane->b;
   double n = dane->n;
+*/
+  
+  Dane dane = *((Dane*) arg);
+  double a = dane.a;
+  double b = dane.b;
+  double n = dane.n;  
     
   double h = (b-a)/(double)n; //wysokosć trapezów
   double S = 0.0; //zmienna będzie przechowywać sumę pól trapezów
@@ -53,9 +60,9 @@ void * watek_licz_pole (void *arg) {
   
   // synchronizacja:
   
-  //pthread_mutex_lock (&m);
+  pthread_mutex_lock (&m);
   wynik += (.5 * S * h);
-  //pthread_mutex_unlock (&m);
+  pthread_mutex_unlock (&m);
   
   
   //dane->w = S*0.5*h;
@@ -76,10 +83,7 @@ int main() {
     
     if (b<a) {
         return 0;
-    }
-    
-    Dane dane;
-    dane.n=n;
+    }       
     
     pthread_mutex_init (&m, NULL);
     // sekwencyjnie
@@ -89,17 +93,22 @@ int main() {
     //drukuj_czas();
     // podzadania na watkow
     int i, k=4;
-    dane.a=a;
-    dane.b=a;
+    Dane dane[k];    
+    for (i=0;i<k;i++) {
+        dane[i].a=a;
+        dane[i].b=a;
+        dane[i].n=n;
+    }
     
     pthread_t watki[k];
     double x = (b-a)/k; // x-wielkosc przedzialow dla k-watkow
     //inicjuj_czas();
-    for(i=0;i<k;i++){
-        dane.b += x;
-        pthread_create(&watki[i], NULL, watek_licz_pole, &dane);
-        sleep(1);
-        dane.a = dane.b;
+    for(i=0;i<k;i++){        
+        dane[i].b += x;
+        pthread_create(&watki[i], NULL, watek_licz_pole, &dane[i]);
+        //sleep(1);
+        dane[i+1].a = dane[i].b;
+        dane[i+1].b = dane[i].b;
     }   
     // czekamy na watki    
     for (i=0;i<k;i++) {
