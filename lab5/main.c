@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "pomiar_czasu.h"
-#include <unistd.h>
+#include <time.h>
+//#include <unistd.h>
 
-// build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread
+// build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread -L pomiar_czasu.h pomiar_czasu.c
+
 
 typedef struct Dane {double a,b; int n; } Dane;
 double wynik = .0;
@@ -87,10 +89,11 @@ int main() {
     
     pthread_mutex_init (&m, NULL);
     // sekwencyjnie
-    //inicjuj_czas();
+    inicjuj_czas();
     double w = licz_pole(a, b, n);
     printf("\tWynik calki sekwencyjnie: %f\n", w);
-    //drukuj_czas();
+    drukuj_czas();
+    
     // podzadania na watkow
     int i, k=4;
     Dane dane[k];    
@@ -102,7 +105,7 @@ int main() {
     
     pthread_t watki[k];
     double x = (b-a)/k; // x-wielkosc przedzialow dla k-watkow
-    //inicjuj_czas();
+    inicjuj_czas();
     for(i=0;i<k;i++){        
         dane[i].b += x;
         pthread_create(&watki[i], NULL, watek_licz_pole, &dane[i]);
@@ -115,7 +118,7 @@ int main() {
         pthread_join(watki[i], NULL);
     }
     printf("\tWynik calki liczonej na %d watkach: %f \n", k, wynik);
-    //drukuj_czas();
+    drukuj_czas();
     pthread_exit(NULL);
     //return (EXIT_SUCCESS);
 }

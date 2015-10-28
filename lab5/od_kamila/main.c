@@ -3,12 +3,12 @@
 #include<pthread.h>
 #include<math.h>
 #define WATKI 4
-#define DOKLADNOSC 100
+#define DOKLADNOSC 1000
 
-double dx;
-double xp;
-double xk;
-double wynik=0;
+float dx;
+float xp;
+float xk;
+float wynik=0;
 pthread_mutex_t muteks;
 pthread_t watki[WATKI];
 
@@ -19,11 +19,13 @@ return x*x + x + 4;
 
 void *zadanie_watkow(void *arg_wsk)
 {
-int i,j,id,suma=0;
+int i,id;
 
+float j,suma=0;
 id=*((int*)arg_wsk);
 j=DOKLADNOSC/WATKI;
-for(i=j*id+1;i<=j*(id+1);++i)
+
+for(i=(j*id)+1;i<=j*(id+1);++i)
 suma+=funkcja(xp+i*dx);
 
 pthread_mutex_lock(&muteks);
@@ -39,14 +41,14 @@ int i;
 int indeksy[WATKI];
 
 printf("Podaj poczatek przedzialu calkowania\n");
-scanf("%lf", &xp);
+scanf("%f", &xp);
  
 printf("Podaj koniec przedzialu calkowania\n");
-scanf("%lf", &xk);
+scanf("%f", &xk);
 
 
 dx=(xk-xp)/DOKLADNOSC;
-
+printf("dx= %f\n",dx);
 for(i=0;i<WATKI;++i)
 indeksy[i]=i;
 
