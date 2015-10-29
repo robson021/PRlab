@@ -10,7 +10,7 @@
 // build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread -L pomiar_czasu.h pomiar_czasu.c
 
 
-typedef struct Dane {double a,b; int n; } Dane;
+typedef struct Dane {double a,b; int n, id; } Dane;
 double wynik = .0;
 
 pthread_mutex_t m;
@@ -77,22 +77,21 @@ void * watek_licz_pole2 (void * arg) {
   double a = dane->a;
   double b = dane->b;
   double n = dane->n;
-    
-    
-  double h = (b-a)/n; //wysokosć trapezów
-  double S = 0.0; //zmienna będzie przechowywać sumę pól trapezów
-  double podstawa_a = fun(a), podstawa_b;
+  int i, j, id = dane->id;
   
-  int i;
-  for(i=a;i<=b;i++)
-  {
+  double S =.0;
+  double h = (b-a)/n;
+  
+  i=(j*id)+1;    
+  double podstawa_a = fun(a*i*h), podstawa_b;
+  
+  for( ;i<=j*(id+1);++i) {
     podstawa_b = fun(a+h*i);
     S += (podstawa_a+podstawa_b);
     podstawa_a = podstawa_b;
   }
   
-  // synchronizacja:
-  
+  // synchronizacja:  
   pthread_mutex_lock (&m);
   wynik += (.5 * S * h);
   pthread_mutex_unlock (&m);
@@ -145,42 +144,26 @@ int main() {
     printf("\tWynik calki liczonej na %d watkach (dekompozycja): %f \n", k, wynik);
     drukuj_czas();
     
-    // zrownoleglenie petli - ŹLE
+    // zrownoleglenie petli
     
     wynik = .0;
-    double xx = n/k;
-    int z = xx;
-/*
-    if (xx>z)
-        z++;
-*/
-    
     Dane dane2[k];
-    //int i;
     for (i=0;i<k;i++) {
-        dane2[i].a=1;
-        dane2[i].b=0;
+        dane2[i].a=a;
+        dane2[i].b=b;
         dane2[i].n=n;
-    }
-    
-    pthread_t watki2[k];
-    
-    inicjuj_czas();    
+        dane2[i].id=i;
+    }    
+    pthread_t threads[k];
+    inicjuj_czas();
     for (i=0;i<k;i++) {
-        dane2[i].b += z;        
-        pthread_create(&watki2[i], NULL, watek_licz_pole2, &dane2[i]);
-        
-        dane2[i+1].a = dane2[i].b+1;
-        dane2[i+1].b = dane2[i].b;
-    }     
+        pthread_create(&threads[i], NULL, watek_licz_pole2, &dane2[i]);
+    }    
+    for (i=0;i<k;i++)
+        pthread_join(threads[i], NULL);
     
-    for (i=0;i<k;i++) {
-        pthread_join(watki[i], NULL);
-    }
-    
-    printf("\tWynik całki na %d watkach (loop parallelism): %f \n", k, wynik);
+    printf("\tWynik calki liczonej na %d watkach (loop paralleism): %f \n", k, wynik);
     drukuj_czas();
-    
     
     
     pthread_exit(NULL);
