@@ -10,7 +10,7 @@
 // build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread -L pomiar_czasu.h pomiar_czasu.c
 
 
-typedef struct Dane {double a,b; int n, id; } Dane;
+typedef struct Dane {int a,b; int n, id, k; } Dane;
 double wynik = .0;
 
 pthread_mutex_t m;
@@ -39,8 +39,8 @@ void * watek_licz_pole (void *arg) {
     
   Dane *dane = arg;  
   
-  double a = dane->a;
-  double b = dane->b;
+  int a = dane->a;
+  int b = dane->b;
   double n = dane->n;
   
 /*
@@ -74,15 +74,18 @@ void * watek_licz_pole (void *arg) {
 
 void * watek_licz_pole2 (void * arg) {
   Dane *dane = arg;
-  double a = dane->a;
-  double b = dane->b;
+  int a = dane->a;
+  int b = dane->b;
   double n = dane->n;
   int i, j, id = dane->id;
+  int k = dane->k;
   
   double S =.0;
   double h = (b-a)/n;
   
-  i=(j*id)+1;    
+  j = n/k;  
+  i=(j*id)+1;
+  
   double podstawa_a = fun(a*i*h), podstawa_b;
   
   for( ;i<=j*(id+1);++i) {
@@ -153,6 +156,7 @@ int main() {
         dane2[i].b=b;
         dane2[i].n=n;
         dane2[i].id=i;
+        dane2[i].k=k;
     }    
     pthread_t threads[k];
     inicjuj_czas();
