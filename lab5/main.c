@@ -120,9 +120,15 @@ int main() {
     inicjuj_czas();
     double w = licz_pole(a, b, n);
     printf("\tWynik calki sekwencyjnie: %f\n", w);
-    drukuj_czas();    
-  
-    int i, k=4;
+    drukuj_czas();  
+    
+    int k=2;
+    
+    for ( ;k<=6;k+=2) {
+    
+    wynik = .0;    
+        
+    int i; //k=4;
     Dane dane[k];    
     for (i=0;i<k;i++) {
         dane[i].a=a;
@@ -168,7 +174,9 @@ int main() {
     
     printf("\tWynik calki liczonej na %d watkach (loop paralleism): %f \n", k, wynik);
     drukuj_czas();
+    printf("\n");
     
+    }
     
     pthread_exit(NULL);
     //return (EXIT_SUCCESS);
