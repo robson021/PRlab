@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,51 +28,53 @@ public class Lab6 {
     private static final int RANGE_FROM = 33, RANGE_TO = 95;
     private static final int RANGE = RANGE_TO - RANGE_FROM;
     
+    private static Object lock = new Object();
+    
         
     private Random random;
     private Picture picture;    
-    private AtomicInteger[] counterOfMarks;
+    private int[] counterOfMarks;
     private AtomicInteger taskEned = new AtomicInteger(0);
     
     ExecutorService pool; // thread pool
     
-    public Lab6() throws InterruptedException {
-        
+    public Lab6() throws InterruptedException {        
         random = new Random();
         picture = new Picture();
         pool = Executors.newFixedThreadPool(POOL_SIZE);        
-        counterOfMarks = new AtomicInteger[RANGE];
+        counterOfMarks = new int[RANGE];
         // ------------PART A------------------
         for (int i=0;i<RANGE;i++)
-            counterOfMarks[i] = new AtomicInteger(0);
+            counterOfMarks[i] = 0;
         
         for (int i=0;i<RANGE;i++) {            
             // adding new threads to pool
             pool.submit(new MarksCounterRunnable(i+RANGE_FROM));
-            System.out.println("task #" + i + " has been started");
-            
+            //System.out.println("task #" + i + " has been started");
+            //Thread.sleep(100);
         }
-        
-        boolean tof = pool.awaitTermination(15, TimeUnit.SECONDS);
+        // threads are Runnable objects, not Callable-Future. Will always return false
+        boolean tof = pool.awaitTermination(5, TimeUnit.SECONDS); // wait 15s for threads
         if (tof) {
             System.out.println("All tasks has been ended");
         } else {
             System.out.println("Pool closed. Not all tasks has been ended");
-            System.out.println("Task started: " + RANGE + ", task ended: " + taskEned.get());
+            System.out.println("Task started: " + RANGE + ", task ended: " + taskEned.get());            
         } System.out.println("---------------------------------------");
         
-        for (AtomicInteger i : counterOfMarks) {
-            int x = i.get();
-            char c = (char) (x+RANGE_FROM);          
-            System.out.print(c + ": ");
-            for (int j=0;j<x;j++)
-                System.out.print("=");
-            System.out.println(" "+x);
-        }
+          // FUCKED UP
+//        for (int i=0;i<RANGE;i++) { 
+//            int x = counterOfMarks[i];
+//            char c = (char) (x+RANGE_FROM);          
+//            System.out.print(c + " (ascii - "+(x+RANGE_FROM)+"): ");
+//            for (int j=0;j<x;j++)
+//                System.out.print("=");
+//            System.out.println(" "+x);
+//        }
         
         
         // -----------------PART B -------------------
-        System.exit(0);
+        //System.exit(0);
                       
     }
     
@@ -98,9 +101,12 @@ public class Lab6 {
     
     private class MarksCounterRunnable implements Runnable {       
         private final int asciiCode;
+        private final char c;
         private int counter = 0;
         public MarksCounterRunnable(int ascii) {
             asciiCode = ascii;
+            c = (char) ascii;
+            //System.out.println("Searching for: " + (char) asciiCode);
         }       
 
         @Override
@@ -113,9 +119,20 @@ public class Lab6 {
                 }
             
             //System.out.print((char)asciiCode + " wystąpienia: " + counter);
-            counterOfMarks[asciiCode - RANGE_FROM].set(counter);
-            System.out.println("task #" + (asciiCode-RANGE_FROM) + " has been ended");
+            
+            synchronized (lock) {
+                counterOfMarks[asciiCode - RANGE_FROM] = this.counter; 
+                System.out.print(c+": ");
+                for (int i=0;i<counter;i++) {
+                    System.out.print("=");
+                } System.out.println(" x" + counter);
+            }
+            
+            
+            
+            //System.out.println("task #" + (asciiCode-RANGE_FROM) + " has been ended");           
             taskEned.incrementAndGet();
+           
         }
 //        int getCounter() {
 //            return this.counter;
@@ -138,6 +155,7 @@ public class Lab6 {
     public static void main(String[] args) {        
         try {        
             Lab6 lab = new Lab6();
+            System.exit(0);
         } catch (InterruptedException ex) {
             Logger.getLogger(Lab6.class.getName()).log(Level.SEVERE, null, ex);
         }
