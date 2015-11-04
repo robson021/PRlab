@@ -44,7 +44,7 @@ public class Lab6 {
         picture = new Picture();
         pool = Executors.newFixedThreadPool(POOL_SIZE);        
         counterOfMarks = new AtomicInteger[RANGE];
-        
+        // ------------PART A------------------
         for (int i=0;i<RANGE;i++)
             counterOfMarks[i] = new AtomicInteger(0);
         
@@ -73,7 +73,7 @@ public class Lab6 {
         }
         
         
-        
+        // -----------------PART B -------------------
         System.exit(0);
                       
     }
