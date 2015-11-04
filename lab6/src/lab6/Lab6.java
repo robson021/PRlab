@@ -26,7 +26,8 @@ public class Lab6 {
     private static final int POOL_SIZE = 8;
     private static final int RANGE_FROM = 33, RANGE_TO = 97;
     private static final int RANGE = RANGE_TO - RANGE_FROM;
-    private static final int THREAD_COUNT = 8;
+    private static final int THREAD_COUNT = 4;
+    private static final int TASKS_SIZE = MARKS_SIZE / THREAD_COUNT;
     
     private static Object lock = new Object();
     
@@ -43,7 +44,9 @@ public class Lab6 {
         picture = new Picture();
         pool = Executors.newFixedThreadPool(POOL_SIZE);        
         counterOfMarks = new int[RANGE];
-        // ------------PART A------------------
+        
+        
+        // ------------ PART A------------------
         for (int i=0;i<RANGE;i++)
             counterOfMarks[i] = 0;
         
@@ -61,6 +64,7 @@ public class Lab6 {
             System.out.println("Pool closed. Not all tasks has been ended");
             System.out.println("Task started: " + RANGE + ", task ended: " + taskEned.get());            
         } System.out.println("---------------------------------------");
+        pool=null;
         
          
         /*        FUCKED UP
@@ -76,13 +80,31 @@ public class Lab6 {
         */
         
         
-        // -----------------PART B -------------------
-        //System.exit(0);
+        // ----------------- PART B -------------------
+        
+        for (int i=0;i<counterOfMarks.length;i++)
+            counterOfMarks[i] = 0;        
+        pool = Executors.newFixedThreadPool(POOL_SIZE);
+        
+        for (int i=0;i<THREAD_COUNT;i++) {
+            pool.submit(new MarksCounter2Runnable(i));
+        }
+        
+        pool.awaitTermination(30, TimeUnit.SECONDS);
+        
+        for (int i=0;i<counterOfMarks.length;i++) {
+            char c = (char) (i + RANGE_FROM);
+            int val = counterOfMarks[i];
+            System.out.print(c + ": ");
+            for (int j=0;j<val;j++){
+                System.out.print("=");
+            } System.out.println("");
+        }
                       
     }
     
     private class Picture {
-        char[][] marks;
+        private char[][] marks;
 
         public Picture() {
             marks = new char[MARKS_SIZE][MARKS_SIZE];
@@ -141,6 +163,41 @@ public class Lab6 {
 //        int getCounter() {
 //            return this.counter;
 //        }        
+    }
+    
+    private class MarksCounter2Runnable implements Runnable {
+        private final int ID;
+        private final int STARTING_POINT;
+        private final int ENDING_POINT;        
+        
+        public MarksCounter2Runnable(int i) {
+            ID = i;
+            STARTING_POINT = ID * TASKS_SIZE;
+            ENDING_POINT = STARTING_POINT + TASKS_SIZE;
+        }
+
+        @Override
+        public void run() {
+            for (int x, i=STARTING_POINT; i< ENDING_POINT; i++) {
+                for (int j=0;j<MARKS_SIZE;j++) {
+                    x = picture.getCharOnIndex(i, j);                    
+                    tryToMatch (x);    
+                }
+            }
+        }
+        
+        private void tryToMatch(int asciiCode) {
+            for (int i=STARTING_POINT;i<ENDING_POINT;i++) {
+                if (asciiCode == (i+RANGE_FROM)) 
+                {
+                    synchronized (lock) {
+                        counterOfMarks[asciiCode - RANGE_FROM]++;
+                    }
+                    //return;
+                }
+            }
+        }
+        
     }
     
     
