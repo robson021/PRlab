@@ -69,19 +69,6 @@ public class Lab6 {
         } System.out.println("---------------------------------------");
         pool=null;
         
-         
-        /*        FUCKED UP
-        for (int i=0;i<RANGE;i++) { 
-            int x = counterOfMarks[i];
-            char c = (char) (x+RANGE_FROM);          
-            System.out.print(c + " (ascii - "+(x+RANGE_FROM)+"): ");
-            for (int j=0;j<x;j++)
-                System.out.print("=");
-            System.out.println(" "+x);
-        } 
-        
-        */
-        
         
         // ----------------- PART B -------------------
         
@@ -92,7 +79,7 @@ public class Lab6 {
         for (int i=0;i<threads.length;i++) {
             threads[i] = new Thread(new MarksCounter2Runnable(i));
             threads[i].start();
-            Thread.sleep(3);
+            //Thread.sleep(3);
         }
         
         for (int i=0;i<threads.length;i++)
@@ -104,7 +91,7 @@ public class Lab6 {
             System.out.print(c + ": ");
             for (int j=0;j<val;j++) {
                 System.out.print("=");
-            } System.out.println(" x" + val);
+            } System.out.println(" x"+val);
         }
                       
     }
@@ -150,12 +137,14 @@ public class Lab6 {
                 }
             
             //System.out.print((char)asciiCode + " wystąpienia: " + counter);
-            lock.lock();
-            try {
-                counterOfMarks[asciiCode - RANGE_FROM] = this.counter;                 
-            } finally {
-                lock.unlock();
-            }
+//            lock.lock();
+//            try {
+//                counterOfMarks[asciiCode - RANGE_FROM] = this.counter;                 
+//            } finally {
+//                lock.unlock();
+//            }
+            
+            
                 System.out.print("'"+c+"'"+": ");
                 for (int i=0;i<counter;i++) {
                     System.out.print("=");
@@ -163,14 +152,11 @@ public class Lab6 {
             
             
             
-            
             //System.out.println("task #" + (asciiCode-RANGE_FROM) + " has been ended");           
             taskEned.incrementAndGet();
            
         }
-//        int getCounter() {
-//            return this.counter;
-//        }        
+     
     }
     
     private class MarksCounter2Runnable implements Runnable {
@@ -204,13 +190,6 @@ public class Lab6 {
         }
         
     }
-    
-    
-    
-    
-    
-    
-    
     
     
     
