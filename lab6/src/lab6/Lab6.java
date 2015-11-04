@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,8 +24,9 @@ import java.util.logging.Logger;
 public class Lab6 {
     private static final int MARKS_SIZE = 20;
     private static final int POOL_SIZE = 8;
-    private static final int RANGE_FROM = 33, RANGE_TO = 95;
+    private static final int RANGE_FROM = 33, RANGE_TO = 97;
     private static final int RANGE = RANGE_TO - RANGE_FROM;
+    private static final int THREAD_COUNT = 8;
     
     private static Object lock = new Object();
     
@@ -62,15 +62,18 @@ public class Lab6 {
             System.out.println("Task started: " + RANGE + ", task ended: " + taskEned.get());            
         } System.out.println("---------------------------------------");
         
-          // FUCKED UP
-//        for (int i=0;i<RANGE;i++) { 
-//            int x = counterOfMarks[i];
-//            char c = (char) (x+RANGE_FROM);          
-//            System.out.print(c + " (ascii - "+(x+RANGE_FROM)+"): ");
-//            for (int j=0;j<x;j++)
-//                System.out.print("=");
-//            System.out.println(" "+x);
-//        }
+         
+        /*        FUCKED UP
+        for (int i=0;i<RANGE;i++) { 
+            int x = counterOfMarks[i];
+            char c = (char) (x+RANGE_FROM);          
+            System.out.print(c + " (ascii - "+(x+RANGE_FROM)+"): ");
+            for (int j=0;j<x;j++)
+                System.out.print("=");
+            System.out.println(" "+x);
+        } 
+        
+        */
         
         
         // -----------------PART B -------------------
@@ -121,12 +124,13 @@ public class Lab6 {
             //System.out.print((char)asciiCode + " wystąpienia: " + counter);
             
             synchronized (lock) {
-                counterOfMarks[asciiCode - RANGE_FROM] = this.counter; 
-                System.out.print(c+": ");
+                counterOfMarks[asciiCode - RANGE_FROM] = this.counter;                 
+            }
+                System.out.print("'"+c+"'"+": ");
                 for (int i=0;i<counter;i++) {
                     System.out.print("=");
                 } System.out.println(" x" + counter);
-            }
+            
             
             
             
