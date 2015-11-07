@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,11 +26,13 @@ public class Lab6 {
     private static final int MARKS_SIZE = 20;
     private static final int POOL_SIZE = 8;
     private static final int RANGE_FROM = 33, RANGE_TO = 97;
-    private static final int RANGE = RANGE_TO - RANGE_FROM;
+    //private static final int RANGE = RANGE_TO - RANGE_FROM;
     private static final int THREAD_COUNT = 4;
     private static final int TASKS_SIZE = MARKS_SIZE / THREAD_COUNT;
     
-    private static Object lock = new Object();
+    private static ReentrantLock lock = new ReentrantLock();
+    private Thread[] threads;
+
     
         
     private Random random;
@@ -43,14 +46,14 @@ public class Lab6 {
         random = new Random();
         picture = new Picture();
         pool = Executors.newFixedThreadPool(POOL_SIZE);        
-        counterOfMarks = new int[RANGE];
+        counterOfMarks = new int[RANGE_TO];
         
         
         // ------------ PART A------------------
-        for (int i=0;i<RANGE;i++)
+        for (int i=0;i<RANGE_TO;i++)
             counterOfMarks[i] = 0;
         
-        for (int i=0;i<RANGE;i++) {            
+        for (int i=0;i<RANGE_TO;i++) {            
             // adding new threads to pool
             pool.submit(new MarksCounterRunnable(i+RANGE_FROM));
             //System.out.println("task #" + i + " has been started");
@@ -62,43 +65,33 @@ public class Lab6 {
             System.out.println("All tasks has been ended");
         } else {
             System.out.println("Pool closed. Not all tasks has been ended");
-            System.out.println("Task started: " + RANGE + ", task ended: " + taskEned.get());            
+            System.out.println("Task started: " + RANGE_TO + ", task ended: " + taskEned.get());            
         } System.out.println("---------------------------------------");
         pool=null;
-        
-         
-        /*        FUCKED UP
-        for (int i=0;i<RANGE;i++) { 
-            int x = counterOfMarks[i];
-            char c = (char) (x+RANGE_FROM);          
-            System.out.print(c + " (ascii - "+(x+RANGE_FROM)+"): ");
-            for (int j=0;j<x;j++)
-                System.out.print("=");
-            System.out.println(" "+x);
-        } 
-        
-        */
         
         
         // ----------------- PART B -------------------
         
         for (int i=0;i<counterOfMarks.length;i++)
             counterOfMarks[i] = 0;        
-        pool = Executors.newFixedThreadPool(POOL_SIZE);
         
-        for (int i=0;i<THREAD_COUNT;i++) {
-            pool.submit(new MarksCounter2Runnable(i));
+        threads = new Thread[THREAD_COUNT];
+        for (int i=0;i<threads.length;i++) {
+            threads[i] = new Thread(new MarksCounter2Runnable(i));
+            threads[i].start();
+            //Thread.sleep(3);
         }
         
-        pool.awaitTermination(30, TimeUnit.SECONDS);
+        for (int i=0;i<threads.length;i++)
+            threads[i].join();
         
-        for (int i=0;i<counterOfMarks.length;i++) {
-            char c = (char) (i + RANGE_FROM);
-            int val = counterOfMarks[i];
+        for (int val, i=0;i<counterOfMarks.length;i++) {
+            char c = (char) (i+RANGE_FROM);
+            val = counterOfMarks[i];
             System.out.print(c + ": ");
-            for (int j=0;j<val;j++){
+            for (int j=0;j<val;j++) {
                 System.out.print("=");
-            } System.out.println("");
+            } System.out.println(" x"+val);
         }
                       
     }
@@ -144,10 +137,14 @@ public class Lab6 {
                 }
             
             //System.out.print((char)asciiCode + " wystąpienia: " + counter);
+//            lock.lock();
+//            try {
+//                counterOfMarks[asciiCode - RANGE_FROM] = this.counter;                 
+//            } finally {
+//                lock.unlock();
+//            }
             
-            synchronized (lock) {
-                counterOfMarks[asciiCode - RANGE_FROM] = this.counter;                 
-            }
+            
                 System.out.print("'"+c+"'"+": ");
                 for (int i=0;i<counter;i++) {
                     System.out.print("=");
@@ -155,57 +152,44 @@ public class Lab6 {
             
             
             
-            
             //System.out.println("task #" + (asciiCode-RANGE_FROM) + " has been ended");           
             taskEned.incrementAndGet();
            
         }
-//        int getCounter() {
-//            return this.counter;
-//        }        
+     
     }
     
     private class MarksCounter2Runnable implements Runnable {
         private final int ID;
         private final int STARTING_POINT;
-        private final int ENDING_POINT;        
+        private final int ENDING_POINT;
         
-        public MarksCounter2Runnable(int i) {
-            ID = i;
-            STARTING_POINT = ID * TASKS_SIZE;
-            ENDING_POINT = STARTING_POINT + TASKS_SIZE;
+        public MarksCounter2Runnable(int id) {
+            ID=id;         
+            STARTING_POINT=id*TASKS_SIZE;
+            ENDING_POINT=STARTING_POINT + TASKS_SIZE;
         }
 
         @Override
         public void run() {
-            for (int x, i=STARTING_POINT; i< ENDING_POINT; i++) {
-                for (int j=0;j<MARKS_SIZE;j++) {
-                    x = picture.getCharOnIndex(i, j);                    
-                    tryToMatch (x);    
-                }
-            }
-        }
-        
-        private void tryToMatch(int asciiCode) {
-            for (int i=STARTING_POINT;i<ENDING_POINT;i++) {
-                if (asciiCode == (i+RANGE_FROM)) 
+            System.out.println("thread #" +(ID+1)+ " started");
+            int x, index;
+            for (int i=STARTING_POINT;i<ENDING_POINT;i++)
+                for (int j=0;j<MARKS_SIZE;j++) 
                 {
-                    synchronized (lock) {
-                        counterOfMarks[asciiCode - RANGE_FROM]++;
+                    x=picture.getCharOnIndex(i, j);
+                    index = x - RANGE_FROM;
+                    lock.lock();
+                    try {  
+                        //System.out.println("index: "+x);
+                        counterOfMarks[index]++;                        
+                    } finally {
+                        lock.unlock();
                     }
-                    //return;
                 }
-            }
         }
         
     }
-    
-    
-    
-    
-    
-    
-    
     
     
     
