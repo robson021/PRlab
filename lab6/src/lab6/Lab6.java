@@ -56,8 +56,7 @@ public class Lab6 {
         for (int i=0;i<RANGE_TO;i++) {            
             // adding new threads to pool
             pool.submit(new MarksCounterRunnable(i+RANGE_FROM));
-            //System.out.println("task #" + i + " has been started");
-            //Thread.sleep(100);
+            //System.out.println("task #" + i + " has been started");            
         }
         // threads are Runnable objects, not Callable-Future. Will always return false
         boolean tof = pool.awaitTermination(5, TimeUnit.SECONDS); // wait 15s for threads
@@ -108,7 +107,7 @@ public class Lab6 {
                 }
                 System.out.println("");
             }
-            System.out.println("---------------------------------------");
+            System.out.println("----------------------------------------");
         }
         
         public char getCharOnIndex (int i, int j) {
@@ -134,24 +133,13 @@ public class Lab6 {
                     int x = picture.getCharOnIndex(i, j);
                     if (x == asciiCode)
                         counter++;
-                }
-            
-            //System.out.print((char)asciiCode + " wystąpienia: " + counter);
-//            lock.lock();
-//            try {
-//                counterOfMarks[asciiCode - RANGE_FROM] = this.counter;                 
-//            } finally {
-//                lock.unlock();
-//            }
-            
+                }          
             
                 System.out.print("'"+c+"'"+": ");
                 for (int i=0;i<counter;i++) {
                     System.out.print("=");
                 } System.out.println(" x" + counter);
-            
-            
-            
+                
             //System.out.println("task #" + (asciiCode-RANGE_FROM) + " has been ended");           
             taskEned.incrementAndGet();
            
@@ -178,10 +166,9 @@ public class Lab6 {
                 for (int j=0;j<MARKS_SIZE;j++) 
                 {
                     x=picture.getCharOnIndex(i, j);
-                    index = x - RANGE_FROM;
-                    lock.lock();
+                    index = x - RANGE_FROM;                    
                     try {  
-                        //System.out.println("index: "+x);
+                        lock.lock();
                         counterOfMarks[index]++;                        
                     } finally {
                         lock.unlock();
