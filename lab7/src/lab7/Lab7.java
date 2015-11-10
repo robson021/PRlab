@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package lab7;
 
 import java.util.ArrayList;
@@ -16,126 +17,143 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  *
  * @author robert
+ * Czytelnia. Problem pisarzy i czytelników.
+ * 
  */
+
+
 public class Lab7 {
-    private static final int TOTAL_READERS = 100;  
-    private static final int MAX_PEOPLE_INSIDE = 3;
-    private static final Random random = new Random();
-    private List<Thread> threads;
     
-    private int readers=0, writers=0, totalPeople=0;
-    //private Semaphore semaphore;
+    private static final int READERS_TOTAL = 8_000;
+    //private static final int MAX_PEOPLE_INSIDE = 15;
+    
+    private static final Random rng = new Random();
+    private static final int RANGE = 10;
+    private List<Thread> threads;    
     
     private Lock lock;
-    private Condition enteranceCondition; 
-    private Condition insideCondition;
+    private Condition readerCondition;
+    private Condition writerCondition;
     
-    //private ExecutorService pool;
+    private boolean isWriterWaiting = false;
+    
+    private int readersThatEntered = 0;
+    private int writersThatEntered = 0;   
+    
+    private int readersTotal=0, writersTotal=0;
+    private int totalPeopleToday = 0;
     
     public Lab7() {
-        lock = new ReentrantLock(true);        
-        enteranceCondition = lock.newCondition();
-        insideCondition = lock.newCondition();
-        //semaphore = new Semaphore();
+        lock = new ReentrantLock(true);
+        readerCondition = lock.newCondition();
+        writerCondition = lock.newCondition();
         threads = new ArrayList<>();
-        //pool = Executors.newFixedThreadPool(12);
     }
-    
-    
-    
-    public void openReadingRoom() throws InterruptedException {  
-        //new Thread(semaphore).start();
+   
+
+    private void openReadingRoom() throws InterruptedException {
+        /* to high "READERS_TOTAL" count may lead to 
+        "OutOfMemoryError" due to too high thread count*/
         
-        for (int i=0;i<TOTAL_READERS;i++) {
+        for (int i=0; i<READERS_TOTAL;i++) {
             Thread t = new Thread(new Reader());
             threads.add(t);
             t.start();
             
-            if ( ((i+1) % 10) == 0) {
+            if ((i+1)%(rng.nextInt(10)+1) == 0) { // every X readers add new writer to queue
                 Thread t2 = new Thread(new Writer());
                 threads.add(t2);
                 t2.start();
             }
         }
         
-        for (Thread t : threads)
-            t.join();  
-        //semaphore.stop();
-        System.out.println("Reading room closed. Total people today: "+totalPeople);
+        for (Thread t : threads) 
+            t.join();
+        
+        // check out
+        System.out.println("\n"+readersTotal+" + "+writersTotal+" = "+(writersTotal+readersTotal));
+        System.out.println("Total peple today: "+totalPeopleToday);
     }
     
-    
     private class Reader implements Runnable {
-        private final int TIME = random.nextInt(150);
+        private final int TIME = rng.nextInt(RANGE) + 3;
 
         @Override
         public void run() {
+            
             lock.lock();
             try {
-                while (writers>0 || (MAX_PEOPLE_INSIDE <=(readers+writers)))
-                    enteranceCondition.await();
+                while (writersThatEntered > 0 || isWriterWaiting)
+                    readerCondition.await();
+                
+                readersThatEntered++;
+                totalPeopleToday++;
+                readersTotal++;
+                printInfo();
+                
+                readerCondition.signal();
+                readerCondition.await(TIME, TimeUnit.MILLISECONDS); // reading time      
                 
                 
-                totalPeople++;
-                readers++;
-                System.out.print("Reader #"+Thread.currentThread().getId()+" has entered for "+TIME+" ms. ");
-                System.out.println("Readers inside: "+readers+". Writers inside: "+writers);
-                insideCondition.await(TIME, TimeUnit.MILLISECONDS);
                 
-                readers--;
-                enteranceCondition.signal();                
-                
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            } finally {
-                System.out.println("Reader #"+Thread.currentThread().getId()+" exited.");
-                lock.unlock();                
-            }            
-        }
-
-    }    
-    
-    private class Writer implements Runnable {
-        private final int TIME = random.nextInt(250);
-
-        @Override
-        public void run() {
-            lock.lock();
-            try {
-                while ( readers > 0 ) 
-                    enteranceCondition.await();
-                
-                writers++;
-                totalPeople++;
-                System.out.print("Writer #"+Thread.currentThread().getId()+" has entered for "+TIME+" ms.");
-                System.out.println(" Readers inside: "+readers+". Writers inside: "+writers);
-                insideCondition.await(TIME, TimeUnit.MILLISECONDS);
-                
-                writers--;
-                enteranceCondition.signal();
                 
             } catch (InterruptedException ex) {
             } finally {
-                System.out.println("Writer #"+Thread.currentThread().getId()+" exited.");
+                readersThatEntered--;
+                if (readersThatEntered == 0)
+                    writerCondition.signalAll();
                 lock.unlock();
             }
         }
         
     }
     
-    
-       
-    
+    private class Writer implements Runnable {
+        private final int TIME = rng.nextInt(RANGE) + 3;
 
+        @Override
+        public void run() {
+            
+            lock.lock();
+            try {
+                isWriterWaiting = true;
+                while (readersThatEntered > 0)
+                    writerCondition.await();
+                
+                isWriterWaiting = false;
+                writersThatEntered++;
+                totalPeopleToday++;
+                writersTotal++;
+                printInfo();
+                
+                writerCondition.signal();
+                writerCondition.await(TIME, TimeUnit.MILLISECONDS); // writing time
+                
+                
+            } catch (InterruptedException ex) {
+            } finally {
+                writersThatEntered--;
+                if  (writersThatEntered == 0)
+                    readerCondition.signalAll();
+                lock.unlock();
+            }            
+        }                      
+    }
+    
+    private void printInfo() {
+        System.out.println("Readers inside: "+readersThatEntered +". Writers inside: "+writersThatEntered);
+    }
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        try {
+        try {        
             new Lab7().openReadingRoom();
         } catch (InterruptedException ex) {
             ex.printStackTrace();
-        }        
+        }
+        
         System.exit(0);
     }
 
