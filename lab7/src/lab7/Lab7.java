@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Lab7 {
     
     private static final int READERS_TOTAL = 8_000;
-    //private static final int MAX_PEOPLE_INSIDE = 15;
+    private static final int MAX_PEOPLE_INSIDE = 150;
     
     private static final Random rng = new Random();
     private static final int RANGE = 10;
@@ -35,7 +35,7 @@ public class Lab7 {
     private final Condition readerCondition;
     private final Condition writerCondition;
     
-    private boolean isWriterWaiting = false;
+    //private boolean isWriterWaiting = false;
     
     private int readersThatEntered = 0;
     private int writersThatEntered = 0;   
@@ -52,9 +52,9 @@ public class Lab7 {
    
 
     private void openReadingRoom() throws InterruptedException {
-        /* too high "READERS_TOTAL" count may lead to 
-        "OutOfMemoryError" due to too high threads number */
         
+        /* too high "READERS_TOTAL" count may lead to 
+        "OutOfMemoryError" due to too high threads number */        
         for (int i=0; i<READERS_TOTAL;i++) {
             Thread t = new Thread(new Reader());
             threads.add(t);
@@ -64,7 +64,7 @@ public class Lab7 {
                 Thread t2 = new Thread(new Writer());
                 threads.add(t2);
                 t2.start();
-            }
+            }            
         }
         final int TOTAL = threads.size();
         for (Thread t : threads) 
@@ -98,7 +98,7 @@ public class Lab7 {
                                 
             } catch (InterruptedException ex) {
             } finally {                
-                if (readersThatEntered >= 10) {
+                if (readersThatEntered >= MAX_PEOPLE_INSIDE) {
                     readersThatEntered = 0;
                     writerCondition.signalAll();
                 }
@@ -115,11 +115,11 @@ public class Lab7 {
             
             lock.lock();
             try {
-                isWriterWaiting = true;
+                //isWriterWaiting = true;
                 while (readersThatEntered > 0)
                     writerCondition.await();
                 
-                isWriterWaiting = false;
+                //isWriterWaiting = false;
                 writersThatEntered++;
                 //totalPeopleToday++;
                 writersTotal++;
@@ -133,7 +133,7 @@ public class Lab7 {
                 
             } catch (InterruptedException ex) {
             } finally {
-                if  (writersThatEntered >= 10) {
+                if  (writersThatEntered >= MAX_PEOPLE_INSIDE) {
                     writersThatEntered = 0;
                     readerCondition.signalAll(); 
                 }
