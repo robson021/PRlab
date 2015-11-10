@@ -29,11 +29,11 @@ public class Lab7 {
     
     private static final Random rng = new Random();
     private static final int RANGE = 10;
-    private List<Thread> threads;    
+    private final List<Thread> threads;    
     
-    private Lock lock;
-    private Condition readerCondition;
-    private Condition writerCondition;
+    private final Lock lock;
+    private final Condition readerCondition;
+    private final Condition writerCondition;
     
     private boolean isWriterWaiting = false;
     
@@ -41,7 +41,7 @@ public class Lab7 {
     private int writersThatEntered = 0;   
     
     private int readersTotal=0, writersTotal=0;
-    private int totalPeopleToday = 0;
+    //private int totalPeopleToday = 0;
     
     public Lab7() {
         lock = new ReentrantLock(true);
@@ -52,8 +52,8 @@ public class Lab7 {
    
 
     private void openReadingRoom() throws InterruptedException {
-        /* to high "READERS_TOTAL" count may lead to 
-        "OutOfMemoryError" due to too high thread count*/
+        /* too high "READERS_TOTAL" count may lead to 
+        "OutOfMemoryError" due to too high threads number */
         
         for (int i=0; i<READERS_TOTAL;i++) {
             Thread t = new Thread(new Reader());
@@ -66,13 +66,13 @@ public class Lab7 {
                 t2.start();
             }
         }
-        
+        final int TOTAL = threads.size();
         for (Thread t : threads) 
             t.join();
         
-        // check out
+        // checking out if all the threads were executed
         System.out.println("\n"+readersTotal+" + "+writersTotal+" = "+(writersTotal+readersTotal));
-        System.out.println("Total peple today: "+totalPeopleToday);
+        System.out.println("Total peple today: "+TOTAL);
     }
     
     private class Reader implements Runnable {
@@ -83,29 +83,28 @@ public class Lab7 {
             
             lock.lock();
             try {
-                while (writersThatEntered > 0 || isWriterWaiting)
+                while (writersThatEntered > 0 /*|| isWriterWaiting*/)
                     readerCondition.await();
                 
                 readersThatEntered++;
-                totalPeopleToday++;
+                //totalPeopleToday++;
                 readersTotal++;
                 printInfo();
                 
-                readerCondition.signal();
-                readerCondition.await(TIME, TimeUnit.MILLISECONDS); // reading time      
+                if (readersThatEntered < 10)
+                    readerCondition.signal();
                 
-                
-                
-                
+                readerCondition.await(TIME, TimeUnit.MILLISECONDS); // reading time                                     
+                                
             } catch (InterruptedException ex) {
-            } finally {
-                readersThatEntered--;
-                if (readersThatEntered == 0)
+            } finally {                
+                if (readersThatEntered >= 10) {
+                    readersThatEntered = 0;
                     writerCondition.signalAll();
+                }
                 lock.unlock();
             }
-        }
-        
+        }        
     }
     
     private class Writer implements Runnable {
@@ -122,19 +121,22 @@ public class Lab7 {
                 
                 isWriterWaiting = false;
                 writersThatEntered++;
-                totalPeopleToday++;
+                //totalPeopleToday++;
                 writersTotal++;
                 printInfo();
                 
-                writerCondition.signal();
+                if (writersThatEntered < 10)
+                    writerCondition.signal();
+                
                 writerCondition.await(TIME, TimeUnit.MILLISECONDS); // writing time
                 
                 
             } catch (InterruptedException ex) {
             } finally {
-                writersThatEntered--;
-                if  (writersThatEntered == 0)
-                    readerCondition.signalAll();
+                if  (writersThatEntered >= 10) {
+                    writersThatEntered = 0;
+                    readerCondition.signalAll(); 
+                }
                 lock.unlock();
             }            
         }                      
@@ -151,7 +153,6 @@ public class Lab7 {
         try {        
             new Lab7().openReadingRoom();
         } catch (InterruptedException ex) {
-            ex.printStackTrace();
         }
         
         System.exit(0);
