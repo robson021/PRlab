@@ -24,7 +24,7 @@ public class Lab7_v2 {
     
     private int readersInside = 0, writersInside = 0;
     private int writersTotal = 0, readersTotal = 0;
-    private int isWriterWaiting = 0;
+    private int waitingWriters = 0;
     
     public Lab7_v2() {
         lock = new ReentrantLock(true); // fair lock
@@ -62,7 +62,7 @@ public class Lab7_v2 {
             lock.lock();
             isLocked = true;
             try {
-                while (isWriterWaiting > 0 || readersInside == MAX_PEOPLE_INSIDE ||
+                while (waitingWriters > 0 || readersInside >= MAX_PEOPLE_INSIDE ||
                         writersInside > 0)
                     readerCondition.await();
                 
@@ -70,7 +70,7 @@ public class Lab7_v2 {
                 readersTotal++;
                 printInfo();  
                 
-                if (isWriterWaiting==0 && readersInside < MAX_PEOPLE_INSIDE) {
+                if (waitingWriters==0 && readersInside < MAX_PEOPLE_INSIDE) {
                     readerCondition.signal();
                     lock.unlock();
                     isLocked = false;
@@ -81,8 +81,13 @@ public class Lab7_v2 {
                 
             } catch (InterruptedException ex) {
             } finally {
-                if (isLocked)
-                    lock.unlock();                               
+                if (isLocked) {
+                    if (waitingWriters > 0)
+                        writerCondition.signal();
+                    else readerCondition.signal();
+                    
+                    lock.unlock();   
+                }                            
             }
         }
         
@@ -94,19 +99,19 @@ public class Lab7_v2 {
         @Override
         public void run() {
             lock.lock();
-            isWriterWaiting++;
+            waitingWriters++;
             try {
                 while ((readersInside + writersInside) > 0)
                     writerCondition.await();
                 
                 writersInside++;      
                 writersTotal++;
-                isWriterWaiting--;
+                waitingWriters--;
                 printInfo();
                                 
                 Thread.sleep(TIME);            
                 writersInside--;
-                if (isWriterWaiting > 0)
+                if (waitingWriters > 0)
                     writerCondition.signal();
                 else readerCondition.signalAll();
                 
