@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Robert N.
  */
 public class Lab7_v2 {
-    private static final int READERS_COUNT = 1_000;
+    private static final int READERS_COUNT = 1_500;
     private static final int MAX_PEOPLE_INSIDE = 10;
     
     private static final Random rng = new Random();
@@ -120,8 +120,8 @@ public class Lab7_v2 {
     
     private void printInfo() {
         System.out.println("Readers inside: "+readersInside +". Writers inside: "+writersInside);
-        if (readersInside > MAX_PEOPLE_INSIDE || writersInside > 1)
-            System.out.println("ERROR! TOO MANY PEOPLE INSIDE");
+        //if (readersInside > MAX_PEOPLE_INSIDE || writersInside > 1)
+            //System.out.println("ERROR! TOO MANY PEOPLE INSIDE");
     }
 
     
