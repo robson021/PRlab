@@ -20,47 +20,45 @@ public class ReadingRoom {
     private final Lock lock = new ReentrantLock(true);
     private final Condition readerCondition = lock.newCondition(),
                             writerCondition = lock.newCondition();
-    private boolean isNotified = false;
         
     private final List<String> message = new ArrayList<>();
     private int readersInside = 0;
     private int writersInside = 0;
+    private int writersWaiting = 0;
     
     public String getMessage() throws InterruptedException {
-        lock.lock();
+        lock.lock();   
         try {
-            while (message.isEmpty() || writersInside > 0)
+            while (message.isEmpty() || writersInside > 0 || writersWaiting > 0)
                 readerCondition.await();
             
-            readersInside++;            
-           
-            Thread.sleep(2);          
-            
+            readersInside++;    
+            Thread.sleep(2); 
             readersInside--;
-            return message.toString();            
-        } finally { 
-            if (message.isEmpty() && !isNotified) {
-                isNotified = true;
-                writerCondition.signal();
-            }
+            //printInfo();            
+            return message.toString();  
             
-            else readerCondition.signal();
+        } finally { 
+            if (message.isEmpty()) 
+                writerCondition.signal();                        
+            else readerCondition.signal();            
             lock.unlock();
         }
     }
     
     public void writeMessage(String msg) throws InterruptedException {
         lock.lock();
+        writersWaiting++;
         try {
             while ((readersInside + writersInside) > 0)
                 writerCondition.await();
             
             writersInside++;
-            
+            //printInfo();
             message.add(msg);            
-            isNotified = false;
             Thread.sleep(2);
             writersInside--;
+            writersWaiting--;
             
         } finally {
             readerCondition.signalAll();
@@ -98,5 +96,9 @@ public class ReadingRoom {
         }
         System.exit(0);
     }
+
+//    private void printInfo() {
+//        System.out.println("Readers: "+readersInside+". Writers: "+writersInside);
+//    }
     
 }
