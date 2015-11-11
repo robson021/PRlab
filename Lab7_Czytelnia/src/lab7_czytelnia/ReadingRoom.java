@@ -20,6 +20,7 @@ public class ReadingRoom {
     private final Lock lock = new ReentrantLock(true);
     private final Condition readerCondition = lock.newCondition(),
                             writerCondition = lock.newCondition();
+                            //waitCondition = lock.newCondition();
         
     private final List<String> message = new ArrayList<>();
     private int readersInside = 0;
@@ -33,9 +34,12 @@ public class ReadingRoom {
                 readerCondition.await();
             
             readersInside++;    
-            Thread.sleep(2); 
+            
+            //printInfo(); 
+            //waitCondition.await();
+            Thread.sleep(2);
             readersInside--;
-            //printInfo();            
+                       
             return message.toString();  
             
         } finally { 
@@ -46,12 +50,20 @@ public class ReadingRoom {
         }
     }
     
+    /**
+     *
+     * @param msg the new message, that will be added to the List
+     * @throws InterruptedException
+     */
     public void writeMessage(String msg) throws InterruptedException {
         lock.lock();
         writersWaiting++;
         try {
-            while ((readersInside + writersInside) > 0)
+            while ((readersInside + writersInside) > 0) {
+                //if (readersInside >=10)
+                    //waitCondition.signalAll();
                 writerCondition.await();
+            }
             
             writersInside++;
             //printInfo();

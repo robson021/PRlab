@@ -14,7 +14,7 @@ import java.util.Random;
 public class Writer implements Runnable{
     
     private static final Random random = new Random();
-    private static final String[] messages = {"dasda ", "gdfgd ", "qewqe "};
+    private static final String[] messages = {"dasda", "gdfgd", "qewqe", "hjkhk", "yuiuyi"};
     private final ReadingRoom readingRoom;
     public Writer(ReadingRoom c) {
         readingRoom=c;
@@ -23,9 +23,7 @@ public class Writer implements Runnable{
     @Override
     public void run() {
         while (true) {
-            int x = random.nextInt(3);
-            //int n = random.nextInt(8) + 1;
-            
+            int x = random.nextInt(5);            
             try {
                 readingRoom.writeMessage(messages[x]);
                 System.out.println("Writer "+ Thread.currentThread().getId() +
