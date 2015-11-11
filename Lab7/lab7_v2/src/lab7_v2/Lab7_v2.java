@@ -83,6 +83,7 @@ public class Lab7_v2 {
                 readersInside--;
                 
             } catch (InterruptedException ex) {
+                ex.printStackTrace();
             } finally {
                 if (isLocked) {
                     if (waitingWriters > 0)
@@ -119,6 +120,7 @@ public class Lab7_v2 {
                 else readerCondition.signalAll();
                 
             } catch (InterruptedException ex) {
+                ex.printStackTrace();
             } finally {
                 lock.unlock();
             }
