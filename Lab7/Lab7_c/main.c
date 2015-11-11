@@ -12,6 +12,7 @@
  * build: gcc -I/usr/include -L/usr/lib64 main.c -lpthread
  */
 int main() {
+    printf("hello world\n");
     
 
     return (EXIT_SUCCESS);
