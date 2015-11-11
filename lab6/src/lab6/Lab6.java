@@ -30,7 +30,7 @@ public class Lab6 {
     private static final int THREAD_COUNT = 4;
     private static final int TASKS_SIZE = MARKS_SIZE / THREAD_COUNT;
     
-    private static ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock lock = new ReentrantLock();
     private Thread[] threads;
 
     
@@ -167,9 +167,9 @@ public class Lab6 {
                 for (int j=0;j<MARKS_SIZE;j++) 
                 {
                     x=picture.getCharOnIndex(i, j);
-                    index = x - RANGE_FROM;                    
+                    index = x - RANGE_FROM;   
+                    lock.lock();
                     try {  
-                        lock.lock();
                         counterOfMarks[index]++;                        
                     } finally {
                         lock.unlock();
