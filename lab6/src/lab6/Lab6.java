@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * 
  */
 public class Lab6 {
-    private static final int MARKS_SIZE = 20;
+     private static final int MARKS_SIZE = 20;
     private static final int POOL_SIZE = 8;
     private static final int RANGE_FROM = 33, RANGE_TO = 97;
     //private static final int RANGE = RANGE_TO - RANGE_FROM;
@@ -42,7 +42,7 @@ public class Lab6 {
     
     ExecutorService pool; // thread pool
     
-    public Lab6() throws InterruptedException {        
+    public TestAPP() throws InterruptedException {        
         random = new Random();
         picture = new Picture();
         pool = Executors.newFixedThreadPool(POOL_SIZE);        
@@ -63,7 +63,7 @@ public class Lab6 {
         if (tof) {
             System.out.println("All tasks has been ended");
         } else {
-            System.out.println("Pool closed. Not all tasks has been ended");
+            //System.out.println("Pool closed. Not all tasks has been ended");
             System.out.println("Task started: " + RANGE_TO + ", task ended: " + taskEned.get());            
         } System.out.println("---------------------------------------");
         pool=null;
@@ -87,10 +87,11 @@ public class Lab6 {
         for (int val, i=0;i<counterOfMarks.length;i++) {
             char c = (char) (i+RANGE_FROM);
             val = counterOfMarks[i];
+            String str = "";
             System.out.print(c + ": ");
             for (int j=0;j<val;j++) {
-                System.out.print("=");
-            } System.out.println(" x"+val);
+                str += "=";
+            } System.out.println(str+" x"+val);
         }
                       
     }
@@ -134,11 +135,11 @@ public class Lab6 {
                     if (x == asciiCode)
                         counter++;
                 }          
-            
+                String str ="";
                 System.out.print("'"+c+"'"+": ");
                 for (int i=0;i<counter;i++) {
-                    System.out.print("=");
-                } System.out.println(" x" + counter);
+                    str += "=";
+                } System.out.println(str+" x" + counter);
                 
             //System.out.println("task #" + (asciiCode-RANGE_FROM) + " has been ended");           
             taskEned.incrementAndGet();
@@ -180,17 +181,16 @@ public class Lab6 {
     
     
     
-    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {        
         try {        
-            Lab6 lab = new Lab6();
-            System.exit(0);
+            new TestAPP();
         } catch (InterruptedException ex) {
-            Logger.getLogger(Lab6.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.exit(0);
+
     }
     
 }
