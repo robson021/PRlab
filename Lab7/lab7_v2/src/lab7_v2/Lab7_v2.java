@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Robert N.
  */
 public class Lab7_v2 {
-    private static final int READERS_COUNT = 1_500;
+    private static final int READERS_COUNT = 800;
     private static final int MAX_PEOPLE_INSIDE = 10;
     
     private static final Random rng = new Random();
@@ -37,14 +37,17 @@ public class Lab7_v2 {
         for (int i=0;i<READERS_COUNT;i++) {
             Thread t = new Thread (new Reader());
             threads.add(t);
-            t.start();
+            //t.start();
             
-            if (rng.nextInt(50) == 0) { // low chance to roll new Writer    
+            if (rng.nextInt(75) == 0) { // low chance to roll new Writer    
                 t = new Thread (new Writer());
                 threads.add(t);
-                t.start();
+                //t.start();
             }
         }
+        
+        for (Thread t : threads)
+            t.start();
         
         for (Thread t : threads)
             t.join();
@@ -137,7 +140,5 @@ public class Lab7_v2 {
         }
         System.exit(0);
     }
-
-    
     
 }
