@@ -3,22 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lab7_readers_writers;
-
-import java.util.Random;
+package lab7_readers_writers_problem;
 
 /**
  *
  * @author robert
  */
-public class Writer implements Runnable {
+public class Reader implements Runnable{
     private final ReadingRoom readingRoom;
-    private static final String[] messages = {"a","b","c","d","e"};
-    private static final Random rng = new Random();
-    private static boolean isWorking = true;
     private long id;
+    private static boolean isWorking = true;
 
-    Writer(ReadingRoom rr) {
+    Reader(ReadingRoom rr) {
         readingRoom = rr;
     }
 
@@ -27,11 +23,10 @@ public class Writer implements Runnable {
         id = Thread.currentThread().getId();
         while (isWorking)
         {
-            int index = rng.nextInt(messages.length);
             try {
-                readingRoom.wantToWrite(messages[index], id);
-                System.out.println("Writer #"+id+": "+messages[index]);
-                Thread.sleep(5);
+                String msg = readingRoom.wantToRead(id);
+                System.out.println("Reader #"+id+": "+msg);
+                Thread.sleep(15);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -40,5 +35,6 @@ public class Writer implements Runnable {
     
     public static void stopWork() {
         isWorking = false;
-    }    
+    }
+    
 }

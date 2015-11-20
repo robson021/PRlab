@@ -1,4 +1,4 @@
-package lab7_readers_writers;
+package lab7_readers_writers_problem;
 
 import java.util.ArrayList;
 import java.util.List;
