@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lab7_czytelnia;
+package lab7_monitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  *
  * @author Robert N.
+ * 
+ * Monitor example - only 1 thread inside
  */
 public class ReadingRoom {
     
@@ -35,7 +37,7 @@ public class ReadingRoom {
             
             readersInside++;    
             
-            //printInfo(); 
+            printInfo(); 
             //waitCondition.await();
             Thread.sleep(2);
             readersInside--;
@@ -66,7 +68,7 @@ public class ReadingRoom {
             }
             
             writersInside++;
-            //printInfo();
+            printInfo();
             message.add(msg);            
             Thread.sleep(2);
             writersInside--;
@@ -109,8 +111,8 @@ public class ReadingRoom {
         System.exit(0);
     }
 
-//    private void printInfo() {
-//        System.out.println("Readers: "+readersInside+". Writers: "+writersInside);
-//    }
+    private void printInfo() {
+        System.out.println("Readers: "+readersInside+". Writers: "+writersInside);
+    }
     
 }
