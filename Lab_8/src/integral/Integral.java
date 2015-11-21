@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -19,8 +20,8 @@ public class Integral {
     
     public Integral() {
         int num_processors = Runtime.getRuntime().availableProcessors();
-        //if (num_processors < 4)
-            //num_processors = 4; // force at least 4 threads
+        if (num_processors < 4)
+            num_processors = 4; // force at least 4 threads
         NUM_THREADS = num_processors;
         
         pool = Executors.newFixedThreadPool(NUM_THREADS);
@@ -76,13 +77,10 @@ public class Integral {
         if(b<a)
             System.exit(1);
                 
-        int size = (int) ((b-a)/NUM_THREADS);        
         for (int i=0; i<NUM_THREADS; i++) {
-            b += size;
             pool.submit(new IntegralTask_LoopParallelism(a, b, i));
-            a=b;
         }
-        Thread.sleep(10);
+        Thread.sleep(1_000);
         //pool.awaitTermination(5, TimeUnit.SECONDS);
         pool.shutdown();
         System.out.println("Integral value = "+integralValue);
@@ -90,7 +88,7 @@ public class Integral {
     }
     
     private double function (double x) {
-        return ( x*x + 4 );
+        return ( x*x + x+ 4 );
     }    
 
     /**
