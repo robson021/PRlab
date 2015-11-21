@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -46,7 +45,7 @@ public class Integral {
 
             double base_a = function(a * i * h), base_b;
             
-            System.out.println(i +" -> "+(j*(id+1))+" ; id = "+id);
+            System.out.println(i +" -> "+(j*(id+1))+" ; thread id = "+id);
 
             for (; i <= j * (id + 1); ++i) {
                 base_b = function(a + h * i);
@@ -99,8 +98,7 @@ public class Integral {
             new Integral().calculateIntegral();
         } catch (IOException ex) {
         } catch (InterruptedException ex) {
-        }
-        
+        }        
         System.exit(0);
     }
     
