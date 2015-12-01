@@ -1,0 +1,192 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <omp.h>
+
+#define WYMIAR 10
+
+main ()
+{
+  double a[WYMIAR][WYMIAR];
+  int n,i,j;
+
+  for(i=0;i<WYMIAR;i++) for(j=0;j<WYMIAR;j++) a[i][j]=1.02*i+1.01*j;
+
+  n=WYMIAR;
+
+  double suma=0.0;
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma += a[i][j];
+    }
+  }
+  
+  printf("Suma wyrazów tablicy: %lf\n", suma);
+
+//----------------------------------
+double suma_parallel=0.0;
+#pragma omp parallel for default (none) ordered schedule (static) shared (a) private (i,j) reduction (+:suma_parallel)
+  
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+      printf("thread %d, i %d, j %d\n", omp_get_thread_num(), i, j);
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle (static): %lf\n", suma_parallel);
+ suma_parallel=0.0;
+#pragma omp parallel for default (none) ordered schedule (static, 3)  shared (a) private (i,j) reduction (+:suma_parallel)
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+      printf("thread %d, i %d, j %d\n", omp_get_thread_num(), i, j);
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle(static 3): %lf\n", suma_parallel);
+ suma_parallel=0.0;
+#pragma omp parallel for default (none) ordered schedule (dynamic) shared (a) private (i,j) reduction (+:suma_parallel)
+  
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+      printf("thread %d, i %d, j %d\n", omp_get_thread_num(), i, j);
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle (dynamic): %lf\n", suma_parallel);
+ suma_parallel=0.0;
+#pragma omp parallel for default (none) ordered schedule (dynamic, 3) shared (a) private (i,j) reduction (+:suma_parallel)
+  
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+      printf("thread %d, i %d, j %d\n", omp_get_thread_num(), i, j);
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle (dynamic 3): %lf\n", suma_parallel);
+
+}
+
+
+// program 1 watki
+
+#include<stdlib.h>
+#include<stdio.h>
+#include<omp.h>
+
+int f_threadprivate = 100;
+
+int main(){
+  
+#ifdef   _OPENMP
+  printf("\nKompilator rozpoznaje dyrektywy OpenMP\n");
+#endif
+
+omp_set_num_threads (5);
+
+  int liczba_watkow;
+  
+  int a_shared = 1;
+  int b_private = 2;
+  int c_firstprivate = 3;
+  int e_atomic=5;
+
+#pragma omp threadprivate (f_threadprivate)
+
+  
+  printf("przed wejsciem do obszaru rownoleglego -  nr_threads %d, thread ID %d\n",
+     omp_get_num_threads(), omp_get_thread_num());
+  printf("\ta_shared \t= %d\n", a_shared);
+  printf("\tb_private \t= %d\n", b_private);
+  printf("\tc_firstprivate \t= %d\n", c_firstprivate);
+  printf("\te_atomic \t= %d\n", e_atomic);
+    
+
+  
+#pragma omp parallel default(none) shared(a_shared, e_atomic) private(b_private) firstprivate(c_firstprivate) num_threads (7)
+  {
+    int i;
+    int d_local_private;
+    d_local_private = a_shared + c_firstprivate;
+
+#pragma omp barrier
+    
+#pragma omp critical (a_shared)
+{
+    for(i=0;i<10;i++){
+      a_shared ++; 
+    }
+}
+    for(i=0;i<10;i++){
+      c_firstprivate += omp_get_thread_num();
+    }
+    
+    for(i=0;i<10;i++){
+#pragma omp atomic
+      e_atomic+=omp_get_thread_num();
+    }
+
+f_threadprivate += omp_get_thread_num();
+
+
+#pragma omp barrier
+
+    #pragma omp critical
+    {
+      
+      printf("\nw obszarze równoległym: aktualna liczba watkow %d, moj ID %d\n",
+         omp_get_num_threads(), omp_get_thread_num());
+      
+      printf("\ta_shared \t= %d\n", a_shared);
+      printf("\tb_private \t= %d\n", b_private);
+      printf("\tc_firstprivate \t= %d\n", c_firstprivate);
+      printf("\td_local_private = %d\n", d_local_private);
+      printf("\te_atomic \t= %d\n", e_atomic);
+      printf("\tf_threadpriv \t= %d\n", f_threadprivate);
+      
+    }
+    
+    //#pragma omp single
+/* #pragma omp master */
+/*         { */
+    
+/*           printf("\ninside single: nr_threads %d, thread ID %d\n", */
+/*              omp_get_num_threads(), omp_get_thread_num()); */
+/*           /\* Get environment information *\/ */
+/*           int procs = omp_get_num_procs(); */
+/*           int nthreads = omp_get_num_threads(); */
+/*           int maxt = omp_get_max_threads(); */
+/*           int inpar = omp_in_parallel(); */
+/*           int dynamic = omp_get_dynamic(); */
+/*           int nested = omp_get_nested(); */
+    
+/*           /\* Print environment information *\/ */
+/*           printf("Number of processors = %d\n", procs); */
+/*           printf("Number of threads = %d\n", nthreads); */
+/*           printf("Max threads = %d\n", maxt); */
+/*           printf("In parallel? = %d\n", inpar); */
+/*           printf("Dynamic threads enabled? = %d\n", dynamic); */
+/*           printf("Nested parallelism supported? = %d\n", nested); */
+    
+/*         } */
+    
+  }
+#pragma omp barrier
+
+  #pragma omp parallel default (none) num_threads (7)
+{
+    printf("\n\tf_threadpriv \t= %d, id=%d\n", f_threadprivate, omp_get_thread_num());
+}
+
+
+  printf("po zakonczeniu obszaru rownoleglego:\n");
+  printf("\ta_shared \t= %d\n", a_shared);
+  printf("\tb_private \t= %d\n", b_private);
+  printf("\tc_firstprivate \t= %d\n", c_firstprivate);
+  printf("\te_atomic \t= %d\n", e_atomic);
+printf("\tf_threadpriv \t= %d\n", f_threadprivate);
+  
+}
