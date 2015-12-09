@@ -1,0 +1,105 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <omp.h>
+
+#define WYMIAR 10
+
+main ()
+{
+#ifdef _OPENMP
+printf("rozpoznano open mp\n");
+#endif
+
+  double a[WYMIAR][WYMIAR];
+  int n,i,j;
+
+  for(i=0;i<WYMIAR;i++) for(j=0;j<WYMIAR;j++) a[i][j]=1.02*i+1.01*j;
+
+  n=WYMIAR;
+
+  double suma=0.0;
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma += a[i][j];
+    }
+  }
+  
+  printf("Suma wyrazów tablicy: %lf\n", suma);
+
+  //omp_set_nested(1);
+
+// 1 - wierszowo
+  double suma_parallel=0.0;
+#pragma omp parallel for default (none) private (i, j) shared(a) reduction(+:suma_parallel)
+  for(i=0;i<WYMIAR;i++) {
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle: %lf\n", suma_parallel);
+
+//2 - kolumnowo I
+  suma_parallel=0.0;
+#pragma omp parallel for default (none) private (i, j) shared(a) reduction(+:suma_parallel)
+  for(j=0;j<WYMIAR;j++) {
+    for(i=0;i<WYMIAR;i++) {
+      suma_parallel += a[i][j];
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle: %lf\n", suma_parallel);
+
+//3 - kolumnowo II
+  suma_parallel=0.0;
+
+  for(i=0;i<WYMIAR;i++) {
+#pragma omp parallel for default (none) firstprivate (i) shared(a) reduction(+:suma_parallel)
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle: %lf\n", suma_parallel);
+
+// blokowo 2D
+omp_set_nested(1);
+suma_parallel=0.0;
+#pragma omp parallel for default (none) ordered private (i, j) shared(a) reduction(+:suma_parallel)
+  for(i=0;i<WYMIAR;i++) {
+    int id1 = omp_get_thread_num();
+#pragma omp ordered
+#pragma omp parallel for default (none) ordered firstprivate (i, id1) shared(a) reduction(+:suma_parallel)
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];
+      int id2 = omp_get_thread_num();
+#pragma omp ordered
+      printf ("i: %d, j: %d watki: %d, %d \n",i,j,id1,id2);
+    }
+  }
+
+  printf("Suma wyrazów tablicy równolegle: %lf\n", suma_parallel);
+
+// blokowo 2D - II
+omp_set_nested(1);
+suma_parallel=0.0;
+double s = 0.0;
+
+#pragma omp parallel default (none) shared(a, s) private (i, j) firstprivate (suma_parallel)
+{
+#pragma omp for 
+  for(i=0;i<WYMIAR;i++) {    
+    for(j=0;j<WYMIAR;j++) {
+      suma_parallel += a[i][j];      
+    }
+  }
+    #pragma omp atomic
+    s+=suma_parallel;
+
+#pragma omp barrier
+#pragma omp master
+printf("\tSuma wyrazów tablicy równolegle: %lf\n", s);
+}
+    
+}
