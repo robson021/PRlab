@@ -108,7 +108,7 @@ printf("\tSuma wyrazów tablicy równolegle: %lf\n", s);
 
 
 
-// zad 2
+/* zad 2 ---------------------------------------------------------------------------------------------- */
 
 #include <stdlib.h>
 #include <stdio.h>
