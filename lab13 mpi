@@ -1,0 +1,96 @@
+#include <stdlib.h>
+#include<stdio.h>
+#include<math.h>
+
+#include "mpi.h"
+
+const int N = 1000;
+
+inline double pow_ (int i) {
+//if (i==0) return 1;
+if (i%2 == 0)
+	return 1;
+else return -1;
+}
+
+int main( int argc, char** argv ){ 
+  
+ /* int rank, ranksent, size, source, dest, tag, i; 
+  MPI_Status status;
+  
+  MPI_Init( &argc, &argv );
+  MPI_Comm_rank( MPI_COMM_WORLD, &rank ); 
+  MPI_Comm_size( MPI_COMM_WORLD, &size );
+  
+  if( rank != 0 ){ dest=0; tag=0; 
+    
+    MPI_Send( &rank, 1, MPI_INT, dest, tag, MPI_COMM_WORLD );
+    
+  } else {
+    
+    for( i=1; i<size; i++ ) { 
+      
+      MPI_Recv( &ranksent, 1, MPI_INT, MPI_ANY_SOURCE, 
+		MPI_ANY_TAG, MPI_COMM_WORLD, &status );
+      printf("Dane od procesu o randze (i=%d): %d (%d)\n", 
+	     i,ranksent, status.MPI_SOURCE );
+    }
+    
+  }
+
+  
+  MPI_Finalize(); */
+// -----------------------------------------------------
+
+double suma_lokalna = .0;
+
+
+int rank, ranksent, size, source, dest, tag, i; 
+  MPI_Status status;
+
+/*
+
+for (i; i<N; i++) {
+ suma_lokalna += pow_(i)/(2.0 * i +1);
+}
+ 
+printf("Sekwencyjnie:\nsuma lokalna %f ; mathPi*4 %f \n", suma_lokalna, (M_PI * 4.0)); 
+*/
+	
+
+  MPI_Init( &argc, &argv );
+  MPI_Comm_rank( MPI_COMM_WORLD, &rank ); 
+  MPI_Comm_size( MPI_COMM_WORLD, &size );
+
+
+double recbuff;
+int iter = N/size;
+recbuff=0;
+if (rank == 0) printf("iteracje/procesy: %d\n", iter);
+
+//int start = rank * iter;
+int end = (rank+1) * iter;
+int start = end - iter;
+suma_lokalna = .0;
+
+printf ("Proces %d, Start: %d, koniec: %d\n",rank, start, end);
+for (i=start; i<end; i++) {
+	suma_lokalna += pow_(i)/(2.0 * i +1);
+}
+
+
+printf("Proces %d, wynik loklany: %f\nStart: %d, koniec: %d\n", rank, suma_lokalna, start, end);
+
+MPI_Reduce(&suma_lokalna, &recbuff, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+
+
+if (rank==0) {
+	//double suma = *(recbuff);
+	printf ("\n\twynik blad %.15lf \n", (recbuff*4)- M_PI);
+}
+
+MPI_Finalize();
+  return(0);
+
+}
